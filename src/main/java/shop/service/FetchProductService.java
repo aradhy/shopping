@@ -19,9 +19,9 @@ public class FetchProductService {
 	@Autowired
 	DaoService daoProductService;
 	
-	public Product getProduct(String id) throws ParseException
+	public Product getProduct(Integer id) throws ParseException
 	{
-		Optional<Product> prodOptional=daoProductService.findById(id);
+		Optional<Product> prodOptional=daoProductService.findByCode(id);
 		if(prodOptional.isPresent())
 		{
 			Product prod=prodOptional.get();

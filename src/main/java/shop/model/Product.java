@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Entity
 public class Product {
 	@Id
-	private String code;
+	private int code;
 	private String name;
 	private Float price;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-YYYY HH:mm:ss", locale = "en")
@@ -35,7 +35,7 @@ public class Product {
 	/**
 	 * @return the code
 	 */
-	public String getCode() {
+	public int getCode() {
 		return code;
 	}
 	/**
@@ -53,7 +53,7 @@ public class Product {
 	/**
 	 * @param code the code to set
 	 */
-	public void setCode(String code) {
+	public void setCode(int code) {
 		this.code = code;
 	}
 	/**

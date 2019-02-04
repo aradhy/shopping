@@ -1,22 +1,13 @@
 package shop.controller;
 
-
-import java.text.ParseException;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import shop.model.Product;
 import shop.service.FetchProductService;
+
+import java.text.ParseException;
 
 @RestController("/")
 public class ProductFetchController {
@@ -25,7 +16,7 @@ public class ProductFetchController {
 	FetchProductService fetchProductService;
 
 	@RequestMapping("/product/{productId}")
-	public Product getProduct(@PathVariable("productId") String productId) throws ParseException {
+	public Product getProduct(@PathVariable("productId") Integer productId) throws ParseException {
 		Product product = fetchProductService.getProduct(productId);
 		
 		return product;
