@@ -2,58 +2,43 @@ package shop.model;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 
+
 @Entity
-public class Product {
+@Table(name="Product")
+public class Product{
 	@Id
-	private int code;
+	private Integer code;
 	private String name;
-	private Float price;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-YYYY HH:mm:ss", locale = "en")
     protected LocalDateTime created_date=LocalDateTime.now();
+	@Column(name="categoryId")
+	private Integer categoryId;
 
-	private int quantity;
-	
-	private String category;
-	/**
-	 * @return the category
-	 */
-	public String getCategory() {
-		return category;
+
+	public Integer getCategoryId() {
+		return categoryId;
 	}
-	/**
-	 * @param category the category to set
-	 */
-	public void setCategory(String category) {
-		this.category = category;
+	public void setCategoryId(Integer categoryId) {
+		this.categoryId = categoryId;
 	}
 	/**
 	 * @return the code
 	 */
-	public int getCode() {
+	public Integer getCode() {
 		return code;
-	}
-	/**
-	 * @return the quantity
-	 */
-	public int getQuantity() {
-		return quantity;
-	}
-	/**
-	 * @param quantity the quantity to set
-	 */
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
 	}
 	/**
 	 * @param code the code to set
 	 */
-	public void setCode(int code) {
+	public void setCode(Integer code) {
 		this.code = code;
 	}
 	/**
@@ -67,18 +52,6 @@ public class Product {
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-	/**
-	 * @return the price
-	 */
-	public Float getPrice() {
-		return price;
-	}
-	/**
-	 * @param price the price to set
-	 */
-	public void setPrice(Float price) {
-		this.price = price;
 	}
 	/**
 	 * @return the created_date

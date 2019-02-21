@@ -1,10 +1,7 @@
 package shop.service;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +30,14 @@ public class FetchProductService {
 
 	public Product createProduct(Product prod) throws ParseException {
 		return daoProductService.save(prod);
+	}
+	
+
+	public List<Product> getProductByCategory(Integer categoryId) throws ParseException
+	{
+		List<Product> prodList=daoProductService.findByCategoryId(categoryId);
+		return prodList;
+		
 	}
 
 }
