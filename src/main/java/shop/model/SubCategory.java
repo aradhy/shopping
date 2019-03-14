@@ -10,60 +10,57 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 @Entity
-@Table(name="Category")
-public class Category
-{
+@Table(name="Sub_Category")
+public class SubCategory  {
+
 	@Id
-	@Column(name="category_Id")
-	private Long category_id;
+	@Column(name="subcategory_Id")
+	private Long id;
 	private String name;
-	private String description;
-	public Category(Long id,String name)
-	{
-		this.category_id=id;
-		this.name=name;
-	}
-	
-	public Category() {
+	public SubCategory() {
 		super();
 		
 	}
+	private String description;
 	
-	@OneToMany(fetch=FetchType.LAZY, targetEntity=SubCategory.class, cascade=CascadeType.ALL,mappedBy="category_id")
-	private Set<SubCategory> subCategory;
+	public SubCategory(Long id,String name)
+	{
+		this.id=id;
+		this.name=name;
+	}
+	@OneToMany(fetch=FetchType.LAZY, targetEntity=Product.class, cascade=CascadeType.ALL,mappedBy="id")
+	private Set<Product> productList;
+	private Long category_id;
 
-	
 	public Long getCategory_id() {
 		return category_id;
 	}
-
 	public void setCategory_id(Long category_id) {
 		this.category_id = category_id;
 	}
-
-	public Set<SubCategory> getSubCategory() {
-		return subCategory;
+	public Set<Product> getProductList() {
+		return productList;
 	}
-
-	public void setSubCategory(Set<SubCategory> subCategory) {
-		this.subCategory = subCategory;
+	public void setProductList(Set<Product> productList) {
+		this.productList = productList;
 	}
-
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
 	public String getDescription() {
 		return description;
 	}
-
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
 }
