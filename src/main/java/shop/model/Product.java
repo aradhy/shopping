@@ -23,7 +23,14 @@ public class Product{
 	
 	private String brand;
     private Long imageId;
-    public String getBrand() {
+    private String imageLink;
+    public String getImageLink() {
+		return imageLink;
+	}
+	public void setImageLink(String imageLink) {
+		this.imageLink = imageLink;
+	}
+	public String getBrand() {
 		return brand;
 	}
 	public void setBrand(String brand) {

@@ -75,5 +75,12 @@ public class FetchProductService {
 		return productList;
 		
 	}
+	
+	public List<Product> getProductByBrand(String brandName)
+	{
+		List<Product> productList= daoProductService.findProductByBrand(brandName);
+		return productList;
+		
+	}
 
 }

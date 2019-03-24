@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import shop.model.Product;
 @SpringBootApplication
 @Configuration
-@ComponentScan(basePackages={"shop.main","shop.model","shop.controller","shop.service"})
+@ComponentScan(basePackages={"shop.main","shop.model","shop.controller","shop.service","shop.config","shop.service.impl","shop.util"})
 @EntityScan(basePackageClasses=Product.class)
 @EnableJpaRepositories(basePackages="shop.daoservice")
 public class ShopBoot {

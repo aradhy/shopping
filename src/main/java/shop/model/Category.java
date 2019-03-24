@@ -7,21 +7,35 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name="Category")
+@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
 public class Category
 {
 	@Id
-	@Column(name="category_Id")
-	private Long category_id;
-	private String name;
-	private String description;
-	public Category(Long id,String name)
+	@Column(name="id")
+	protected Long id;
+	protected String name;
+	protected String description;
+	@Column(name="image_id")
+	protected String image_id;
+	@Transient
+	@JsonIgnore
+	protected String imageLink;
+
+	public Category(Long id,String name,String image_id)
 	{
-		this.category_id=id;
+		super();
+		this.id=id;
 		this.name=name;
+		this.image_id=image_id;
 	}
 	
 	public Category() {
@@ -33,12 +47,12 @@ public class Category
 	private Set<SubCategory> subCategory;
 
 	
-	public Long getCategory_id() {
-		return category_id;
+	public Long getId() {
+		return id;
 	}
 
-	public void setCategory_id(Long category_id) {
-		this.category_id = category_id;
+	public void setCategory_id(Long id) {
+		this.id = id;
 	}
 
 	public Set<SubCategory> getSubCategory() {
@@ -64,6 +78,22 @@ public class Category
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getImageId() {
+		return image_id;
+	}
+
+	public void setImageId(String image_id) {
+		this.image_id = image_id;
+	}
+
+	public String getImageLink() {
+		return imageLink;
+	}
+
+	public void setImageLink(String imageLink) {
+		this.imageLink = imageLink;
 	}
 	
 }

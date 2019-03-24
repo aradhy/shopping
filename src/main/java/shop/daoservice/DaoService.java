@@ -27,5 +27,8 @@ public interface DaoService extends JpaRepository<Product,String> {
 	
 	@Query(value="select cat from Category cat  where cat.name like %:categoryName%")
 	Category findCategoryDetails( @Param("categoryName") String categoryName);
+
+	@Query(value="select prod from Product prod  where prod.brand like %:brandName%")
+	List<Product> findProductByBrand(@Param("brandName") String brandName);
   
 }

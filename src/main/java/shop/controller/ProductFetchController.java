@@ -54,16 +54,24 @@ public class ProductFetchController {
 	}
 	
 	
-	@RequestMapping("/product-name-subcategory")
-	public Set<Product> getProductNameBySubCategory(@RequestParam ("subCategoryName") String subCategoryName) throws ParseException {
+	@RequestMapping("/product-subcategory")
+	public Set<Product> getProductBySubCategory(@RequestParam ("subCategoryName") String subCategoryName) throws ParseException {
 		Set<Product> productList = fetchProductService.getProductBySubCategoryName(subCategoryName);
 		
 		return productList;
 	}
 	
-	@RequestMapping("/product-name-category")
-	public Set<Product> getProductNameByCategory(@RequestParam ("categoryName") String categoryName) throws ParseException {
+	@RequestMapping("/product-category")
+	public Set<Product> getProductByCategory(@RequestParam ("categoryName") String categoryName) throws ParseException {
 		Set<Product> productList = fetchProductService.getProductByCategoryName(categoryName);
+		
+		return productList;
+	}
+	
+	
+	@RequestMapping("/product-brand")
+	public List<Product> getProductByBrandName(@RequestParam ("brandName") String brandName) {
+		List<Product> productList = fetchProductService.getProductByBrand(brandName);
 		
 		return productList;
 	}
