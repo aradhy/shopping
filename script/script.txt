@@ -1,0 +1,55 @@
+CREATE TABLE `category` (
+  `id` varchar(255) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `image_id` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB;
+
+CREATE TABLE `sub_category` (
+  `id` varchar(255) NOT NULL,
+  `category_id` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `image_link` varchar(255) DEFAULT NULL,
+  `image_id` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (category_id) REFERENCES category(id)
+) ENGINE=INNODB;
+
+CREATE TABLE `product` (
+  `code` varchar(20) NOT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `image_id` varchar(20) DEFAULT NULL,
+  `image_link` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `prod_added_date` datetime DEFAULT NULL,
+  `sub_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`code`),
+  FOREIGN KEY (sub_id) REFERENCES sub_category(id)
+) ENGINE=INNODB;
+
+
+
+CREATE TABLE `product_avail` (
+  `id` varchar(40) NOT NULL,
+  `total_avail_units` int(11) DEFAULT NULL,
+  `weight` int(11) DEFAULT NULL,
+   `weight_unit` varchar(10) NOT NULL,
+   `price` double NOT NULL,
+  `product_id` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`),
+   FOREIGN KEY (product_id) REFERENCES product(code)
+) ENGINE=INNODB;
+
+
+
+
+drop TABLE `product_avail`;
+
+
+/**drop table category;
+drop table sub_category;
+drop table product;
+drop table product_avail;
+**/

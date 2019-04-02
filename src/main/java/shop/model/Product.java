@@ -1,9 +1,13 @@
 package shop.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,16 +18,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @Table(name="Product")
 public class Product{
 	@Id
-	private Long code;
+	private String code;
 	private String name;
-	private Long id;
+	private String subId;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-YYYY HH:mm:ss", locale = "en")
     protected LocalDateTime prod_added_date=LocalDateTime.now();
-	
-	
 	private String brand;
-    private Long imageId;
+    private String imageId;
     private String imageLink;
+	@OneToMany(fetch=FetchType.LAZY, targetEntity=ProductAvail.class, cascade=CascadeType.ALL,mappedBy="productId")
+	private List<ProductAvail> productAvailList;
     public String getImageLink() {
 		return imageLink;
 	}
@@ -36,31 +40,31 @@ public class Product{
 	public void setBrand(String brand) {
 		this.brand = brand;
 	}
-	public Long getImageId() {
+	public String getImageId() {
 		return imageId;
 	}
-	public void setImageId(Long imageId) {
+	public void setImageId(String imageId) {
 		this.imageId = imageId;
 	}
 	
    	
 
-	public Long getId() {
-		return id;
+	public String getSubId() {
+		return subId;
 	}
-	public void setId(Long id) {
-		this.id = id;
+	public void setSubId(String subId) {
+		this.subId = subId;
 	}
 	/**
 	 * @return the code
 	 */
-	public Long getCode() {
+	public String getCode() {
 		return code;
 	}
 	/**
 	 * @param code the code to set
 	 */
-	public void setCode(Long code) {
+	public void setCode(String code) {
 		this.code = code;
 	}
 	/**
@@ -80,6 +84,12 @@ public class Product{
 	}
 	public void setProd_added_date(LocalDateTime prod_added_date) {
 		this.prod_added_date = prod_added_date;
+	}
+	public List<ProductAvail> getProductAvailList() {
+		return productAvailList;
+	}
+	public void setProductAvailList(List<ProductAvail> productAvailList) {
+		this.productAvailList = productAvailList;
 	}
 	
 	

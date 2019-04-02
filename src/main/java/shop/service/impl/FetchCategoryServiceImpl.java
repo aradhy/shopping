@@ -29,7 +29,15 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 	
 	public List<Category>  findAllCategory()
 	{
-		ResponseEntity<Object> responseEntity=util.getRequest("http://localhost:8080/category-all/");
+		ResponseEntity<Object> responseEntity=null;
+		try
+		{
+		responseEntity=util.getRequest("http://localhost:8080/category-all/");
+		}
+		catch(Exception ex)
+		{
+			System.out.println("Cache Not working...Might Be Connection Issue");
+		}
 		List<Category> categoryList=null;
 		if(responseEntity !=null && responseEntity.getBody()!=null )
 		{

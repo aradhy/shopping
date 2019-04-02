@@ -1,4 +1,4 @@
-package shop.service;
+/*package shop.service;
 
 import java.text.ParseException;
 
@@ -20,3 +20,4 @@ public class UserService {
 	}
 
 }
+*/

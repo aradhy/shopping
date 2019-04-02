@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import shop.model.SubCategory;
 @Repository
-public interface DaoSubCategoryService extends JpaRepository<SubCategory,Long> {
+public interface DaoSubCategoryService extends JpaRepository<SubCategory,String> {
 	
 	 @Query(value="select sub from SubCategory sub where sub.category_id=:categoryId")
 	List<SubCategory>  findSubCategory(@Param("categoryId") String categoryId);

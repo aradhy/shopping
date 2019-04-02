@@ -1,7 +1,6 @@
 package shop.daoservice;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,11 +12,11 @@ import shop.model.Product;
 import shop.model.SubCategory;
 
 @Repository
-public interface DaoService extends JpaRepository<Product,String> {
-    Optional<Product> findByCode(Long code);
+public interface DaoProductService extends JpaRepository<Product,String> {
+    Product findByCode(String code);
 
 
-	List<Product> findById(Long categoryId);
+	List<Product> findBySubId(String subCategoryId);
 	
 	@Query(value="select prod from Product prod where prod.name like %:productName%")
 	List<Product> findByProductName(@Param("productName") String productName);
@@ -30,5 +29,7 @@ public interface DaoService extends JpaRepository<Product,String> {
 
 	@Query(value="select prod from Product prod  where prod.brand like %:brandName%")
 	List<Product> findProductByBrand(@Param("brandName") String brandName);
+	
+	
   
 }

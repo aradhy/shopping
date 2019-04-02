@@ -1,4 +1,4 @@
-package shop.controller;
+/*package shop.controller;
 
 import java.text.ParseException;
 
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.model.User;
 import shop.service.UserService;
 
-@RestController("/")
+//@RestController("/")
 public class UserController {
 
-	@Autowired
+	
 	UserService userService;
 
 	
@@ -29,3 +29,4 @@ public class UserController {
 	}
 
 }
+*/

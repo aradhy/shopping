@@ -1,6 +1,6 @@
 package shop.model;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -8,23 +8,25 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 @Entity
 @Table(name="Sub_Category")
+@SequenceGenerator(name="seq", initialValue=1, allocationSize=100)
 public class SubCategory{
 	
 	@Id
 	@Column(name="id")
-	protected Long id;
+	protected String id;
 
 	public SubCategory() {
 		super();
 		
 	}
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getName() {
@@ -58,7 +60,7 @@ public class SubCategory{
 	public void setImageLink(String imageLink) {
 		this.imageLink = imageLink;
 	}
-	public SubCategory(Long id,String name,String image_id)
+	public SubCategory(String id,String name,String image_id)
 	{
 		//super(id,name,image_id);
 		this.id=id;
@@ -66,21 +68,21 @@ public class SubCategory{
 		this.image_id=image_id;
 	}
 	
-	@OneToMany(fetch=FetchType.LAZY, targetEntity=Product.class, cascade=CascadeType.ALL,mappedBy="id")
-	private Set<Product> productList;
+	@OneToMany(fetch=FetchType.LAZY, targetEntity=Product.class, cascade=CascadeType.ALL,mappedBy="subId")
+	private List<Product> productList;
 	
-	private Long category_id;
+	private String category_id;
 
-	public Long getCategory_id() {
+	public String getCategory_id() {
 		return category_id;
 	}
-	public void setCategory_id(Long category_id) {
+	public void setCategory_id(String category_id) {
 		this.category_id = category_id;
 	}
-	public Set<Product> getProductList() {
+	public List<Product> getProductList() {
 		return productList;
 	}
-	public void setProductList(Set<Product> productList) {
+	public void setProductList(List<Product> productList) {
 		this.productList = productList;
 	}
 

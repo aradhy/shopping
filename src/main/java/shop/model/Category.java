@@ -7,51 +7,48 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
-@Table(name="Category")
-@Inheritance(strategy=InheritanceType.TABLE_PER_CLASS)
-public class Category
-{
+@Table(name = "Category")
+public class Category {
 	@Id
-	@Column(name="id")
-	protected Long id;
+
+	@Column(name = "id")
+
+	protected String id;
 	protected String name;
 	protected String description;
-	@Column(name="image_id")
+	@Column(name = "image_id")
 	protected String image_id;
 	@Transient
 	@JsonIgnore
 	protected String imageLink;
 
-	public Category(Long id,String name,String image_id)
-	{
+	public Category(String id, String name, String image_id) {
 		super();
-		this.id=id;
-		this.name=name;
-		this.image_id=image_id;
+		this.id = id;
+		this.name = name;
+		this.image_id = image_id;
 	}
-	
+
 	public Category() {
 		super();
-		
+
 	}
-	
-	@OneToMany(fetch=FetchType.LAZY, targetEntity=SubCategory.class, cascade=CascadeType.ALL,mappedBy="category_id")
+
+	@OneToMany(fetch = FetchType.LAZY, targetEntity = SubCategory.class, cascade = CascadeType.ALL, mappedBy = "category_id")
 	private Set<SubCategory> subCategory;
 
-	
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setCategory_id(Long id) {
+	public void setCategory_id(String id) {
 		this.id = id;
 	}
 
@@ -62,7 +59,6 @@ public class Category
 	public void setSubCategory(Set<SubCategory> subCategory) {
 		this.subCategory = subCategory;
 	}
-
 
 	public String getName() {
 		return name;
@@ -95,5 +91,5 @@ public class Category
 	public void setImageLink(String imageLink) {
 		this.imageLink = imageLink;
 	}
-	
+
 }

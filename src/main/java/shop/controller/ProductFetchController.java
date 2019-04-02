@@ -1,6 +1,7 @@
 package shop.controller;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import shop.model.Product;
+import shop.model.ProductAvail;
+import shop.model.SubCategory;
 import shop.service.FetchProductService;
+import shop.service.FetchSubCategoryService;
 
 @RestController
 public class ProductFetchController {
@@ -23,8 +27,11 @@ public class ProductFetchController {
 	@Autowired
 	FetchProductService fetchProductService;
 
+	
+	@Autowired
+	FetchSubCategoryService fetchSubCategoryService;
 	@RequestMapping("/product/{productId}")
-	public Product getProduct(@PathVariable("productId") Long productId) throws ParseException {
+	public Product getProduct(@PathVariable("productId") String productId) throws ParseException {
 		Product product = fetchProductService.getProduct(productId);
 		
 		return product;
@@ -39,9 +46,9 @@ public class ProductFetchController {
 		return new ResponseEntity<String>("Product Id  "+ product.getCode()+" created successfully", 
 			      HttpStatus.CREATED);
 	}
-	@RequestMapping("/product-category/{categoryId}")
-	public List<Product> getProductCategory(@PathVariable("categoryId") Long categoryId) throws ParseException {
-		List<Product> productList = fetchProductService.getProductByCategory(categoryId);
+	@RequestMapping("/product-subCategoryId/{subCategoryId}")
+	public List<Product> getProductSubCategoryId(@PathVariable("subCategoryId") String subCategoryId) throws ParseException {
+		List<Product> productList = fetchProductService.getProductBySubCategory(subCategoryId);
 		
 		return productList;
 	}
@@ -55,8 +62,8 @@ public class ProductFetchController {
 	
 	
 	@RequestMapping("/product-subcategory")
-	public Set<Product> getProductBySubCategory(@RequestParam ("subCategoryName") String subCategoryName) throws ParseException {
-		Set<Product> productList = fetchProductService.getProductBySubCategoryName(subCategoryName);
+	public List<Product> getProductBySubCategory(@RequestParam ("subCategoryName") String subCategoryName) throws ParseException {
+		List<Product> productList = fetchProductService.getProductBySubCategoryName(subCategoryName);
 		
 		return productList;
 	}
@@ -75,5 +82,35 @@ public class ProductFetchController {
 		
 		return productList;
 	}
+	
+	@RequestMapping("/product-category/{categoryId}")
+	public List<Product> getProductCategoryId(@PathVariable("categoryId") String categoryId) throws ParseException {
+		List<SubCategory> subCategoryList =fetchSubCategoryService.findSubCategory(categoryId);
+		List<Product> productList=new ArrayList<Product>();
+		subCategoryList.forEach(subCat->{
+			try {
+				productList.addAll(fetchProductService.getProductBySubCategory(subCat.getId()));
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		
+		
+		
+		return productList;
+	}
+	
+	@RequestMapping("/product-avail/{productId}")
+	public List<ProductAvail> getProductAvail(@PathVariable("productId") String productId) throws ParseException {
+		Product product = fetchProductService.getProduct(productId);
+		List<ProductAvail> productAvail=null;
+		if(product!=null)
+		productAvail=product.getProductAvailList();
+		
+		return productAvail;
+	}
 
+	
+	
 }

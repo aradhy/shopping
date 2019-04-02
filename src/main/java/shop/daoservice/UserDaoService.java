@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import shop.model.User;
 
-@Repository
-public interface UserDaoService extends JpaRepository<User,Integer> {
+
+/*public interface UserDaoService extends JpaRepository<User,Integer> {
     Optional<User> findById(Integer id);
 
-}
+}*/
