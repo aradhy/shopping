@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import shop.dto.ProductDTO;
 import shop.model.Product;
 import shop.model.ProductAvail;
 import shop.model.SubCategory;
@@ -85,17 +86,7 @@ public class ProductFetchController {
 	
 	@RequestMapping("/product-category/{categoryId}")
 	public List<Product> getProductCategoryId(@PathVariable("categoryId") String categoryId) throws ParseException {
-		List<SubCategory> subCategoryList =fetchSubCategoryService.findSubCategory(categoryId);
-		List<Product> productList=new ArrayList<Product>();
-		subCategoryList.forEach(subCat->{
-			try {
-				productList.addAll(fetchProductService.getProductBySubCategory(subCat.getId()));
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
-		
+		List<Product> productList =fetchProductService.getProductByCategory(categoryId);
 		
 		
 		return productList;
@@ -111,6 +102,11 @@ public class ProductFetchController {
 		return productAvail;
 	}
 
-	
+	@RequestMapping("/bucketproducts")
+	public List<ProductDTO> getBucketProducts(@RequestParam List<String> productIdList)
+	{
+		List<ProductDTO> prodList = fetchProductService.getProduct(productIdList);
+		return prodList;
+	}
 	
 }

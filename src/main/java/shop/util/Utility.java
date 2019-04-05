@@ -9,12 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-@Service
+
 public class Utility {
 	
 	
 	
-	public ResponseEntity<Object> getRequest(String url)
+	public static ResponseEntity<Object>  getRequest(String url)
 	{
 		
 		RestTemplate restTemplate=new RestTemplate();
@@ -23,7 +23,7 @@ public class Utility {
 	
 	
 	
-	public Map<String, String> getImageLinks(List<String> imageIds)
+	public static Map<String, String> getImageLinks(List<String> imageIds)
 	{
 		
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl("http://localhost:8090/images");

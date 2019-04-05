@@ -23,9 +23,6 @@ public class FetchSubCategoryServiceImpl implements FetchSubCategoryService {
 	
 	
 	
-	@Autowired
-	private Utility util;
-	
 
 	public List<SubCategory>  findSubCategory(String categoryId)
 	{
@@ -37,7 +34,7 @@ public class FetchSubCategoryServiceImpl implements FetchSubCategoryService {
 			imageIds=subCategoryList.stream().map(subCategory->subCategory.getImageId().toString()).collect(Collectors.toList());
 		
 		
-			Map<String, String> map =util.getImageLinks(imageIds);
+			Map<String, String> map =Utility.getImageLinks(imageIds);
 		   setImageLinkSubCategory(new HashSet<SubCategory>(subCategoryList),map);
 		}
 		return subCategoryList;

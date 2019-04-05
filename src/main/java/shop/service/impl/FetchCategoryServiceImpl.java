@@ -23,8 +23,6 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 	@Autowired
 	private DaoCategoryService daoCategoryService;
 	
-	@Autowired
-	private Utility util;
 
 	
 	public List<Category>  findAllCategory()
@@ -32,7 +30,7 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		ResponseEntity<Object> responseEntity=null;
 		try
 		{
-		responseEntity=util.getRequest("http://localhost:8080/category-all/");
+		responseEntity=Utility.getRequest("http://localhost:8080/category-all/");
 		}
 		catch(Exception ex)
 		{
@@ -50,12 +48,12 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		categoryList = (List<Category>)daoCategoryService.findAll();
 		if(!categoryList.isEmpty())
 		{
-			Map<String, String> map =util.getImageLinks(getImageIdListCategory(categoryList));
+			Map<String, String> map =Utility.getImageLinks(getImageIdListCategory(categoryList));
 			setImageLinkCategory(new HashSet<Category>(categoryList),map);
 			for(Category category:categoryList)
 			{
 				
-			Map<String, String> mapSubCat =util.getImageLinks(getImageIdListSubCategory(category.getSubCategory()));
+			Map<String, String> mapSubCat =Utility.getImageLinks(getImageIdListSubCategory(category.getSubCategory()));
 			setImageLinkSubCategory(category.getSubCategory(),mapSubCat);
 			}
 			

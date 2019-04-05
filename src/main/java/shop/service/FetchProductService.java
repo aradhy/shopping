@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import shop.daoservice.DaoProductService;
+import shop.dto.ProductDTO;
 import shop.model.Category;
 import shop.model.Product;
 import shop.model.SubCategory;
@@ -68,5 +69,16 @@ public class FetchProductService {
 		return productList;
 
 	}
+	
+	public List<ProductDTO> getProduct(List<String> productIdList)  {
+		List<ProductDTO> prodList = daoProductService.findAllById(productIdList);
+		return prodList;
 
+	}
+
+	public List<Product> getProductByCategory(String categoryId)
+	{
+		return daoProductService.findProductByCategory(categoryId);
+	}
+	
 }
