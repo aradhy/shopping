@@ -32,8 +32,8 @@ public class ProductFetchController {
 	@Autowired
 	FetchSubCategoryService fetchSubCategoryService;
 	@RequestMapping("/product/{productId}")
-	public Product getProduct(@PathVariable("productId") String productId) throws ParseException {
-		Product product = fetchProductService.getProduct(productId);
+	public ProductDTO getProduct(@PathVariable("productId") String productId) throws ParseException {
+		ProductDTO product = fetchProductService.getProduct(productId);
 		
 		return product;
 	}
@@ -92,15 +92,7 @@ public class ProductFetchController {
 		return productList;
 	}
 	
-	@RequestMapping("/product-avail/{productId}")
-	public List<ProductAvail> getProductAvail(@PathVariable("productId") String productId) throws ParseException {
-		Product product = fetchProductService.getProduct(productId);
-		List<ProductAvail> productAvail=null;
-		if(product!=null)
-		productAvail=product.getProductAvailList();
-		
-		return productAvail;
-	}
+	
 
 	@RequestMapping("/bucketproducts")
 	public List<ProductDTO> getBucketProducts(@RequestParam List<String> productIdList)

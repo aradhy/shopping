@@ -1,3 +1,11 @@
+drop table IF EXISTS product_avail;
+drop table IF EXISTS product;
+drop table IF EXISTS sub_category;
+drop table IF EXISTS category;
+
+
+
+
 CREATE TABLE `category` (
   `id` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
@@ -45,11 +53,3 @@ CREATE TABLE `product_avail` (
 
 
 
-drop TABLE `product_avail`;
-
-
-/**drop table category;
-drop table sub_category;
-drop table product;
-drop table product_avail;
-**/

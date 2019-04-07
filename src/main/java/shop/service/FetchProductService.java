@@ -20,8 +20,8 @@ public class FetchProductService {
 	@Autowired
 	DaoProductService daoProductService;
 
-	public Product getProduct(String id) throws ParseException {
-		Product prod = daoProductService.findByCode(id);
+	public ProductDTO getProduct(String id) throws ParseException {
+		ProductDTO prod = daoProductService.findByCode(id);
 		return prod;
 
 	}
