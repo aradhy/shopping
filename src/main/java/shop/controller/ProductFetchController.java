@@ -1,9 +1,14 @@
 package shop.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import shop.dto.ProductDTO;
 import shop.model.Product;
 import shop.model.ProductAvail;
-import shop.model.SubCategory;
 import shop.service.FetchProductService;
 import shop.service.FetchSubCategoryService;
 
@@ -32,8 +36,8 @@ public class ProductFetchController {
 	@Autowired
 	FetchSubCategoryService fetchSubCategoryService;
 	@RequestMapping("/product/{productId}")
-	public ProductDTO getProduct(@PathVariable("productId") String productId) throws ParseException {
-		ProductDTO product = fetchProductService.getProduct(productId);
+	public Product getProduct(@PathVariable("productId") String productId,HttpServletResponse response) throws ParseException {
+		Product product = fetchProductService.getProduct(productId);
 		
 		return product;
 	}
@@ -86,10 +90,27 @@ public class ProductFetchController {
 	
 	@RequestMapping("/product-category/{categoryId}")
 	public List<Product> getProductCategoryId(@PathVariable("categoryId") String categoryId) throws ParseException {
-		List<Product> productList =fetchProductService.getProductByCategory(categoryId);
+		List<ProductDTO> productDtoList =fetchProductService.getProductByCategory(categoryId);
+		
+		Map<String,Product> mapProduct=new HashMap<String,Product>();
+		for(ProductDTO prodDto:productDtoList)
+		{
+			if(mapProduct.containsKey(prodDto.getCode()))
+			{
+				mapProduct.put(prodDto.getCode(), convertProductDTOToProduct(new Product(),prodDto));
+			}
+			else
+			{
+				
+				mapProduct.put(prodDto.getCode(), convertProductDTOToProduct(null,prodDto));
+				
+			}
+			
+			
+		}
 		
 		
-		return productList;
+		return new ArrayList<Product>(mapProduct.values());
 	}
 	
 	
@@ -101,4 +122,40 @@ public class ProductFetchController {
 		return prodList;
 	}
 	
+	
+	Product convertProductDTOToProduct(Product product,ProductDTO productDTO)
+	{
+		
+		
+		
+		if(product==null)
+		{
+		product=new Product();
+		product.setCode(productDTO.getCode());
+		product.setBrand(productDTO.getBrand());
+		product.setName(productDTO.getName());
+		product.setImageId(productDTO.getImageId());
+		ProductAvail productAvail=new ProductAvail();
+		productAvail.setProductId(productDTO.getCode());
+		productAvail.setPrice(productDTO.getPrice());
+		productAvail.setWeight(productDTO.getWeight());
+		productAvail.setWeightUnit(productDTO.getWeightUnit());
+		List<ProductAvail> productAvailList=new ArrayList<ProductAvail>();
+		productAvailList.add(productAvail);
+		product.setProductAvailList(productAvailList);
+		}
+		else
+		{
+			ProductAvail productAvail=new ProductAvail();
+			productAvail.setProductId(productDTO.getCode());
+			productAvail.setPrice(productDTO.getPrice());
+			productAvail.setWeight(productDTO.getWeight());
+			productAvail.setWeightUnit(productDTO.getWeightUnit());
+			List<ProductAvail> productAvailList=product.getProductAvailList();
+			productAvailList.add(productAvail);
+			product.setProductAvailList(productAvailList);
+		}
+		return product;
+		
+	}
 }

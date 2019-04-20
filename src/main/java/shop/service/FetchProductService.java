@@ -13,6 +13,7 @@ import shop.dto.ProductDTO;
 import shop.model.Category;
 import shop.model.Product;
 import shop.model.SubCategory;
+import shop.model.Test;
 
 @Service
 public class FetchProductService {
@@ -20,8 +21,8 @@ public class FetchProductService {
 	@Autowired
 	DaoProductService daoProductService;
 
-	public ProductDTO getProduct(String id) throws ParseException {
-		ProductDTO prod = daoProductService.findByCode(id);
+	public Product getProduct(String id) throws ParseException {
+		Product prod = daoProductService.findByCode(id);
 		return prod;
 
 	}
@@ -76,7 +77,7 @@ public class FetchProductService {
 
 	}
 
-	public List<Product> getProductByCategory(String categoryId)
+	public List<ProductDTO> getProductByCategory(String categoryId)
 	{
 		return daoProductService.findProductByCategory(categoryId);
 	}
