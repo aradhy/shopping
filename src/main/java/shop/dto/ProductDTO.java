@@ -2,7 +2,8 @@ package shop.dto;
 
 public class ProductDTO {
 
-	private String code;
+	private String prodAvailId;
+	private String prodCode;
 	private String name;
 	private String brand;
 	private String imageId;
@@ -10,22 +11,21 @@ public class ProductDTO {
 	private Integer weight;
 	private String weightUnit;
 	
-	public ProductDTO(String code, String name,String brand, String imageId,Double price, Integer weight, String weightUnit) {
+	
+	public ProductDTO(String prodAvailId,String prodCode, String name,String brand, String imageId,Double price, Integer weight, String weightUnit) {
 		super();
-		this.code = code;
+		this.setProdAvailId(prodAvailId);
+		this.setProdCode(prodCode);
 		this.name = name;
 		this.brand=brand;
 		this.price=price;
 		this.imageId = imageId;
 		this.weight = weight;
 		this.weightUnit = weightUnit;
+		
 	}
-	public String getCode() {
-		return code;
-	}
-	public void setCode(String code) {
-		this.code = code;
-	}
+	
+	
 	public String getName() {
 		return name;
 	}
@@ -64,6 +64,36 @@ public class ProductDTO {
 	}
 	public void setWeightUnit(String weightUnit) {
 		this.weightUnit = weightUnit;
+	}
+
+	/**
+	 * @return the prodCode
+	 */
+	public String getProdCode() {
+		return prodCode;
+	}
+
+	/**
+	 * @param prodCode the prodCode to set
+	 */
+	public void setProdCode(String prodCode) {
+		this.prodCode = prodCode;
+	}
+
+
+	/**
+	 * @return the prodAvailId
+	 */
+	public String getProdAvailId() {
+		return prodAvailId;
+	}
+
+
+	/**
+	 * @param prodAvailId the prodAvailId to set
+	 */
+	public void setProdAvailId(String prodAvailId) {
+		this.prodAvailId = prodAvailId;
 	}
 	
 	

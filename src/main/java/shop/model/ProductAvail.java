@@ -18,6 +18,7 @@ public class ProductAvail {
 	private String weightUnit;
 	private Double price;
 
+
 	public String getProductId() {
 		return productId;
 	}
@@ -55,6 +56,7 @@ public class ProductAvail {
 	public void setWeightUnit(String weightUnit) {
 		this.weightUnit = weightUnit;
 	}
+	
 	
 
 }

@@ -36,10 +36,27 @@ public class ProductFetchController {
 	@Autowired
 	FetchSubCategoryService fetchSubCategoryService;
 	@RequestMapping("/product/{productId}")
-	public Product getProduct(@PathVariable("productId") String productId,HttpServletResponse response) throws ParseException {
-		Product product = fetchProductService.getProduct(productId);
+	public List<Product> getProduct(@PathVariable("productId") String productId,HttpServletResponse response) throws ParseException {
+		List<ProductDTO> productDtoList = fetchProductService.findByProductCode(productId);
+		Map<String,Product> mapProduct=new HashMap<String,Product>();
+		for(ProductDTO prodDto:productDtoList)
+		{
+			if(mapProduct.containsKey(prodDto.getProdCode()))
+			{
+				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(mapProduct.get(prodDto.getProdCode()),prodDto));
+			}
+			else
+			{
+				
+				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(null,prodDto));
+				
+			}
+			
+			
+		}
 		
-		return product;
+		
+		return new ArrayList<Product>(mapProduct.values());
 	}
 	
 	
@@ -95,14 +112,14 @@ public class ProductFetchController {
 		Map<String,Product> mapProduct=new HashMap<String,Product>();
 		for(ProductDTO prodDto:productDtoList)
 		{
-			if(mapProduct.containsKey(prodDto.getCode()))
+			if(mapProduct.containsKey(prodDto.getProdCode()))
 			{
-				mapProduct.put(prodDto.getCode(), convertProductDTOToProduct(new Product(),prodDto));
+				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(mapProduct.get(prodDto.getProdCode()),prodDto));
 			}
 			else
 			{
 				
-				mapProduct.put(prodDto.getCode(), convertProductDTOToProduct(null,prodDto));
+				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(null,prodDto));
 				
 			}
 			
@@ -116,10 +133,28 @@ public class ProductFetchController {
 	
 
 	@RequestMapping("/bucketproducts")
-	public List<ProductDTO> getBucketProducts(@RequestParam List<String> productIdList)
+	public List<Product> getBucketProducts(@RequestParam List<String> productIdList)
 	{
-		List<ProductDTO> prodList = fetchProductService.getProduct(productIdList);
-		return prodList;
+		List<ProductDTO> productDtoList = fetchProductService.getProduct(productIdList);
+		Map<String,Product> mapProduct=new HashMap<String,Product>();
+		for(ProductDTO prodDto:productDtoList)
+		{
+			if(mapProduct.containsKey(prodDto.getProdCode()))
+			{
+				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(mapProduct.get(prodDto.getProdCode()),prodDto));
+			}
+			else
+			{
+				
+				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(null,prodDto));
+				
+			}
+			
+			
+		}
+		
+		
+		return new ArrayList<Product>(mapProduct.values());
 	}
 	
 	
@@ -131,15 +166,17 @@ public class ProductFetchController {
 		if(product==null)
 		{
 		product=new Product();
-		product.setCode(productDTO.getCode());
+		product.setCode(productDTO.getProdCode());
 		product.setBrand(productDTO.getBrand());
 		product.setName(productDTO.getName());
 		product.setImageId(productDTO.getImageId());
 		ProductAvail productAvail=new ProductAvail();
-		productAvail.setProductId(productDTO.getCode());
+		productAvail.setId(productDTO.getProdAvailId());
+		productAvail.setProductId(productDTO.getProdCode());
 		productAvail.setPrice(productDTO.getPrice());
 		productAvail.setWeight(productDTO.getWeight());
 		productAvail.setWeightUnit(productDTO.getWeightUnit());
+		
 		List<ProductAvail> productAvailList=new ArrayList<ProductAvail>();
 		productAvailList.add(productAvail);
 		product.setProductAvailList(productAvailList);
@@ -147,10 +184,11 @@ public class ProductFetchController {
 		else
 		{
 			ProductAvail productAvail=new ProductAvail();
-			productAvail.setProductId(productDTO.getCode());
+			productAvail.setProductId(productDTO.getProdCode());
 			productAvail.setPrice(productDTO.getPrice());
 			productAvail.setWeight(productDTO.getWeight());
 			productAvail.setWeightUnit(productDTO.getWeightUnit());
+			productAvail.setId(productDTO.getProdAvailId());
 			List<ProductAvail> productAvailList=product.getProductAvailList();
 			productAvailList.add(productAvail);
 			product.setProductAvailList(productAvailList);

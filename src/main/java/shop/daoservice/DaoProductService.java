@@ -16,8 +16,8 @@ import shop.model.SubCategory;
 public interface DaoProductService extends JpaRepository<Product,String> {
 	
 	
-	//@Query(value="select new shop.dto.ProductDTO(prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:code")
-    Product findByCode(@Param("code") String code);
+	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:code")
+    List<ProductDTO> findByProductCode(@Param("code") String code);
 
 
 	List<Product> findBySubId(String subCategoryId);
@@ -34,11 +34,14 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	@Query(value="select prod from Product prod  where prod.brand like %:brandName%")
 	List<Product> findProductByBrand(@Param("brandName") String brandName);
 	
-	@Query(value="select new shop.dto.ProductDTO(prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod join ProductAvail prod_avail on prod.code=prod_avail.productId where prod.code in(:ids)")
+	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod join ProductAvail prod_avail on prod.code=prod_avail.productId where prod.code in(:ids)")
 	List<ProductDTO> findAllById(@Param("ids") List<String> ids);
 	
-	@Query(value="select new shop.dto.ProductDTO(prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId join SubCategory subCat on prod.subId=subCat.id join Category cat on subCat.category_id=cat.id where cat.id=:categoryId")
+	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId join SubCategory subCat on prod.subId=subCat.id join Category cat on subCat.category_id=cat.id where cat.id=:categoryId")
 	List<ProductDTO> findProductByCategory( @Param("categoryId") String categoryId);
+
+
+
 	
 	
   

@@ -21,9 +21,9 @@ public class FetchProductService {
 	@Autowired
 	DaoProductService daoProductService;
 
-	public Product getProduct(String id) throws ParseException {
-		Product prod = daoProductService.findByCode(id);
-		return prod;
+	public List<ProductDTO> findByProductCode(String id) throws ParseException {
+		List<ProductDTO> prodDtoList = daoProductService.findByProductCode(id);
+		return prodDtoList;
 
 	}
 
