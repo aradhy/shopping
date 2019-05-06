@@ -21,9 +21,9 @@ public class FetchProductService {
 	@Autowired
 	DaoProductService daoProductService;
 
-	public List<ProductDTO> findByProductCode(String id) throws ParseException {
-		List<ProductDTO> prodDtoList = daoProductService.findByProductCode(id);
-		return prodDtoList;
+	public ProductDTO findByProductAvail(String productCode,String prodAvailId) throws ParseException {
+		ProductDTO prodDto = daoProductService.findByProductCodeAndAvail(productCode,prodAvailId);
+		return prodDto;
 
 	}
 
@@ -71,8 +71,8 @@ public class FetchProductService {
 
 	}
 	
-	public List<ProductDTO> getProduct(List<String> productIdList)  {
-		List<ProductDTO> prodList = daoProductService.findAllById(productIdList);
+	public List<ProductDTO> getProduct(List<String> productAvailList)  {
+		List<ProductDTO> prodList = daoProductService.findAllByProductAvail(productAvailList);
 		return prodList;
 
 	}

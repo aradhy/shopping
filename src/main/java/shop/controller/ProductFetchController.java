@@ -1,6 +1,5 @@
 package shop.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,28 +34,13 @@ public class ProductFetchController {
 	
 	@Autowired
 	FetchSubCategoryService fetchSubCategoryService;
-	@RequestMapping("/product/{productId}")
-	public List<Product> getProduct(@PathVariable("productId") String productId,HttpServletResponse response) throws ParseException {
-		List<ProductDTO> productDtoList = fetchProductService.findByProductCode(productId);
-		Map<String,Product> mapProduct=new HashMap<String,Product>();
-		for(ProductDTO prodDto:productDtoList)
-		{
-			if(mapProduct.containsKey(prodDto.getProdCode()))
-			{
-				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(mapProduct.get(prodDto.getProdCode()),prodDto));
-			}
-			else
-			{
-				
-				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(null,prodDto));
-				
-			}
-			
-			
-		}
+	@RequestMapping("/product/{productCode}/avId/{prodAvailId}")
+	public ProductDTO getProduct(@PathVariable("productCode") String productCode,@PathVariable("prodAvailId") String prodAvailId ,HttpServletResponse response) throws ParseException {
+		ProductDTO productDto = fetchProductService.findByProductAvail(productCode,prodAvailId);
 		
 		
-		return new ArrayList<Product>(mapProduct.values());
+		
+		return productDto;
 	}
 	
 	
@@ -133,28 +117,13 @@ public class ProductFetchController {
 	
 
 	@RequestMapping("/bucketproducts")
-	public List<Product> getBucketProducts(@RequestParam List<String> productIdList)
+	public List<ProductDTO> getBucketProducts(@RequestParam List<String> productIdList)
 	{
 		List<ProductDTO> productDtoList = fetchProductService.getProduct(productIdList);
-		Map<String,Product> mapProduct=new HashMap<String,Product>();
-		for(ProductDTO prodDto:productDtoList)
-		{
-			if(mapProduct.containsKey(prodDto.getProdCode()))
-			{
-				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(mapProduct.get(prodDto.getProdCode()),prodDto));
-			}
-			else
-			{
-				
-				mapProduct.put(prodDto.getProdCode(), convertProductDTOToProduct(null,prodDto));
-				
-			}
-			
-			
-		}
 		
 		
-		return new ArrayList<Product>(mapProduct.values());
+		
+		return productDtoList;
 	}
 	
 	

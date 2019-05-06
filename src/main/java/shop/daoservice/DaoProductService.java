@@ -16,8 +16,8 @@ import shop.model.SubCategory;
 public interface DaoProductService extends JpaRepository<Product,String> {
 	
 	
-	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:code")
-    List<ProductDTO> findByProductCode(@Param("code") String code);
+/*	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:code")
+    List<ProductDTO> findByProductCode(@Param("code") String code);*/
 
 
 	List<Product> findBySubId(String subCategoryId);
@@ -39,6 +39,12 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	
 	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId join SubCategory subCat on prod.subId=subCat.id join Category cat on subCat.category_id=cat.id where cat.id=:categoryId")
 	List<ProductDTO> findProductByCategory( @Param("categoryId") String categoryId);
+
+	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod join ProductAvail prod_avail on prod.code=prod_avail.productId where prod_avail.id in(:ids)")
+	List<ProductDTO> findAllByProductAvail(@Param("ids") List<String> productAvailList);
+
+	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:productCode and prod_avail.id=:prodAvailId")
+	ProductDTO findByProductCodeAndAvail(@Param("productCode") String productCode,@Param("prodAvailId") String prodAvailId);
 
 
 
