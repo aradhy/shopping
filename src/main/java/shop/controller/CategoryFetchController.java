@@ -1,12 +1,15 @@
 package shop.controller;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import shop.dto.CategoryDTO;
 import shop.model.Category;
 import shop.model.SubCategory;
 import shop.service.FetchCategoryService;
@@ -45,9 +48,9 @@ public class CategoryFetchController {
 	}
 
 	@RequestMapping("/category-all")
-	public List<Category> getCategories()  {
+	public List<CategoryDTO> getCategories()  {
 		
-		List<Category> categoryList=fetchCategoryService.findAllCategory();
+		List<CategoryDTO> categoryList=fetchCategoryService.findAllCategory();
 		return categoryList;
 	}
 	

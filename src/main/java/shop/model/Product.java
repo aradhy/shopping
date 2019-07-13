@@ -3,12 +3,16 @@ package shop.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -27,6 +31,8 @@ public class Product{
     private String imageId;
     private String imageLink;
 	@OneToMany(fetch=FetchType.LAZY, targetEntity=ProductAvail.class, cascade=CascadeType.ALL,mappedBy="productId")
+	@Basic(fetch=FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.TRUE)
 	private List<ProductAvail> productAvailList;
     public String getImageLink() {
 		return imageLink;

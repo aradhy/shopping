@@ -41,7 +41,7 @@ public class Category {
 
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, targetEntity = SubCategory.class, cascade = CascadeType.ALL, mappedBy = "category_id")
+	@OneToMany(fetch = FetchType.EAGER, targetEntity = SubCategory.class, cascade = CascadeType.ALL, mappedBy = "category_id")
 	private Set<SubCategory> subCategory;
 
 	public String getId() {

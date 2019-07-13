@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import shop.daoservice.DaoCategoryService;
+import shop.dto.CategoryDTO;
+import shop.dto.SubCategoryDTO;
 import shop.model.Category;
 import shop.model.SubCategory;
 import shop.service.FetchCategoryService;
@@ -25,8 +28,10 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 	
 
 	
-	public List<Category>  findAllCategory()
+	public List<CategoryDTO>  findAllCategory()
 	{
+		List<Category> categoryList=null;
+		List<CategoryDTO> categorytDTOList = null;
 		ResponseEntity<Object> responseEntity=null;
 		try
 		{
@@ -36,19 +41,19 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		{
 			System.out.println("Cache Not working...Might Be Connection Issue");
 		}
-		List<Category> categoryList=null;
+	
 		if(responseEntity !=null && responseEntity.getBody()!=null )
 		{
-		categoryList=(List<Category>)responseEntity.getBody();
-		
+			categorytDTOList=(List<CategoryDTO>)responseEntity.getBody();
 		}
 		
-		if(categoryList==null || categoryList.isEmpty())
+		if(categorytDTOList==null || categorytDTOList.isEmpty())
 		{
 		categoryList = (List<Category>)daoCategoryService.findAll();
+		categorytDTOList= categoryList.parallelStream().map(category->convertToDTOCategory(category)).collect(Collectors.toList());
 		if(!categoryList.isEmpty())
 		{
-			Map<String, String> map =Utility.getImageLinks(getImageIdListCategory(categoryList));
+			Map<String, String> map =Utility.getImageLinks(getImageIdListCategory(categorytDTOList));
 			setImageLinkCategory(new HashSet<Category>(categoryList),map);
 			for(Category category:categoryList)
 			{
@@ -59,13 +64,31 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 			
 		}
 		}
-		
-		return categoryList;
+			return categorytDTOList;
 		
 	}
 	
+	CategoryDTO convertToDTOCategory(Category category)
+	{
+		CategoryDTO categoryDTO=new CategoryDTO();
+		categoryDTO.setId(category.getId());
+		categoryDTO.setName(category.getName());
+		categoryDTO.setImageId(category.getImageId());
+	    List<SubCategoryDTO> subCategoryList=	category.getSubCategory().parallelStream().map(sub->convertToDTOSubCategory(sub)).collect(Collectors.toList());
+	    categoryDTO.setSubCategoryList(subCategoryList);
+	    
+	    return categoryDTO;
+	}
 	
-	
+	SubCategoryDTO convertToDTOSubCategory(SubCategory subCategory)
+	{
+		SubCategoryDTO subCategoryDTO=new SubCategoryDTO();
+		subCategoryDTO.setId(subCategory.getId());
+		subCategoryDTO.setName(subCategory.getName());
+		subCategoryDTO.setImageId(subCategory.getImageId());
+		return subCategoryDTO;
+		
+	}
 	
 	
 	private void setImageLinkCategory(Set<Category> categoryList,Map<String, String> map)
@@ -73,7 +96,7 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		categoryList.forEach(cat->cat.setImageLink("images//"+map.get(cat.getImageId())));
 	}
 	
-	private List<String>  getImageIdListCategory(List<Category> categoryList)
+	private List<String>  getImageIdListCategory(List<CategoryDTO> categoryList)
 	{
 		List<String> imageIds=categoryList.parallelStream().map(category->category.getImageId().toString()).collect(Collectors.toList());
 		

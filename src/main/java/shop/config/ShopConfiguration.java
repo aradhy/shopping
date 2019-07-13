@@ -8,6 +8,7 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:image_config.properties")
 public class ShopConfiguration {
 	
+	
 	@Value( "${images.pack}" )
 	private String imagesPack;
 

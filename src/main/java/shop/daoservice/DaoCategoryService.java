@@ -15,7 +15,7 @@ public interface DaoCategoryService extends JpaRepository<Category,String> {
 	
 	@Query(value="select new Category(c.id,c.name,c.image_id) from Category c")
 	List<Category>  findCategorySelectedFields();
-	@Query(value="select  c from Category c")
+
 	List<Category>  findAll();
 
 
