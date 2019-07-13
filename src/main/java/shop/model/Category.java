@@ -23,17 +23,17 @@ public class Category {
 	protected String id;
 	protected String name;
 	protected String description;
-	@Column(name = "image_id")
-	protected String image_id;
+	@Column(name = "imageId")
+	protected String imageId;
 	@Transient
 	@JsonIgnore
 	protected String imageLink;
 
-	public Category(String id, String name, String image_id) {
+	public Category(String id, String name, String imageId) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.image_id = image_id;
+		this.imageId = imageId;
 	}
 
 	public Category() {
@@ -41,14 +41,14 @@ public class Category {
 
 	}
 
-	@OneToMany(fetch = FetchType.EAGER, targetEntity = SubCategory.class, cascade = CascadeType.ALL, mappedBy = "category_id")
+	@OneToMany(fetch = FetchType.EAGER, targetEntity = SubCategory.class, cascade = CascadeType.ALL, mappedBy = "categoryId")
 	private Set<SubCategory> subCategory;
 
 	public String getId() {
 		return id;
 	}
 
-	public void setCategory_id(String id) {
+	public void setCategoryId(String id) {
 		this.id = id;
 	}
 
@@ -77,11 +77,11 @@ public class Category {
 	}
 
 	public String getImageId() {
-		return image_id;
+		return imageId;
 	}
 
-	public void setImageId(String image_id) {
-		this.image_id = image_id;
+	public void setImageId(String imageId) {
+		this.imageId = imageId;
 	}
 
 	public String getImageLink() {

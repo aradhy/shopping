@@ -13,7 +13,7 @@ import shop.model.Category;
 @Repository
 public interface DaoCategoryService extends JpaRepository<Category,String> {
 	
-	@Query(value="select new Category(c.id,c.name,c.image_id) from Category c")
+	@Query(value="select new Category(c.id,c.name,c.imageId) from Category c")
 	List<Category>  findCategorySelectedFields();
 
 	List<Category>  findAll();

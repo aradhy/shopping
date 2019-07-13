@@ -11,11 +11,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 @Entity
-@Table(name="Sub_Category")
 @SequenceGenerator(name="seq", initialValue=1, allocationSize=100)
 public class SubCategory{
 	
@@ -46,15 +46,15 @@ public class SubCategory{
 		this.description = description;
 	}
 	public String getImageId() {
-		return image_id;
+		return imageId;
 	}
 	public void setImageId(String imageId) {
-		this.image_id = imageId;
+		this.imageId = imageId;
 	}
 	protected String name;
 	protected String description;
-	@Column(name="image_id")
-	protected String image_id;
+	protected String imageId;
+	@Transient
 	private String imageLink;
 	
 	public String getImageLink() {
@@ -64,24 +64,24 @@ public class SubCategory{
 	public void setImageLink(String imageLink) {
 		this.imageLink = imageLink;
 	}
-	public SubCategory(String id,String name,String image_id)
+	public SubCategory(String id,String name,String imageId)
 	{
 		//super(id,name,image_id);
 		this.id=id;
 		this.name=name;
-		this.image_id=image_id;
+		this.imageId=imageId;
 	}
 	
 	@OneToMany(fetch=FetchType.LAZY, targetEntity=Product.class, cascade=CascadeType.ALL,mappedBy="subId")
 	private List<Product> productList;
 	
-	private String category_id;
+	private String categoryId;
 
-	public String getCategory_id() {
-		return category_id;
+	public String getCategoryId() {
+		return categoryId;
 	}
-	public void setCategory_id(String category_id) {
-		this.category_id = category_id;
+	public void setCategoryId(String categoryId) {
+		this.categoryId = categoryId;
 	}
 	public List<Product> getProductList() {
 		return productList;

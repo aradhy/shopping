@@ -1,8 +1,11 @@
-insert into category values(2,'','T1787','Beverages');
 insert into category values(1,'','T1816','Soap & Detergents');
+insert into category values(2,'','T1787','Beverages');
+insert into category values(3,'','','FRUIT & VEGETABLE');
+insert into category values(4,'','','Beauty | Grooming');
 insert into sub_category values(1,1,'','',1200370,'Soap');
 insert into sub_category values(2,2,'','',1204487,'Tea');
 insert into sub_category values(3,2,'','',1204480,'Cold Drink');
+
 insert into product values(1,'Patanjali',1001,'','Neem Kanti',now(),1);
 insert into product values(2,'Patanjali',1002,'','Aloe Kanti',now(),1);
 insert into product values(3,'Dettol',1003,'','Dettol',now(),1);

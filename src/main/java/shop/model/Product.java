@@ -26,20 +26,13 @@ public class Product{
 	private String name;
 	private String subId;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-YYYY HH:mm:ss", locale = "en")
-    protected LocalDateTime prod_added_date=LocalDateTime.now();
+    protected LocalDateTime prodAddedDate=LocalDateTime.now();
 	private String brand;
     private String imageId;
-    private String imageLink;
 	@OneToMany(fetch=FetchType.LAZY, targetEntity=ProductAvail.class, cascade=CascadeType.ALL,mappedBy="productId")
 	@Basic(fetch=FetchType.LAZY)
     @LazyCollection(LazyCollectionOption.TRUE)
 	private List<ProductAvail> productAvailList;
-    public String getImageLink() {
-		return imageLink;
-	}
-	public void setImageLink(String imageLink) {
-		this.imageLink = imageLink;
-	}
 	public String getBrand() {
 		return brand;
 	}
@@ -86,10 +79,10 @@ public class Product{
 		this.name = name;
 	}
 	public LocalDateTime getProd_added_date() {
-		return prod_added_date;
+		return prodAddedDate;
 	}
-	public void setProd_added_date(LocalDateTime prod_added_date) {
-		this.prod_added_date = prod_added_date;
+	public void setProd_added_date(LocalDateTime prodAddedDate) {
+		this.prodAddedDate = prodAddedDate;
 	}
 	public List<ProductAvail> getProductAvailList() {
 		return productAvailList;

@@ -1,6 +1,9 @@
-drop table IF EXISTS product_avail;
+
+drop table if exists sub_category;
+
+drop table IF EXISTS productAvail;
 drop table IF EXISTS product;
-drop table IF EXISTS sub_category;
+drop table IF EXISTS subCategory;
 drop table IF EXISTS category;
 
 
@@ -9,47 +12,48 @@ drop table IF EXISTS category;
 CREATE TABLE `category` (
   `id` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
-  `image_id` varchar(255) DEFAULT NULL,
+  `imageId` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB;
 
-CREATE TABLE `sub_category` (
+CREATE TABLE `subCategory` (
   `id` varchar(255) NOT NULL,
-  `category_id` varchar(255) DEFAULT NULL,
+  `categoryId` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
-  `image_link` varchar(255) DEFAULT NULL,
-  `image_id` varchar(255) DEFAULT NULL,
+  `imageId` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (category_id) REFERENCES category(id)
+  FOREIGN KEY (categoryId) REFERENCES category(id)
 ) ENGINE=INNODB;
 
 CREATE TABLE `product` (
   `code` varchar(20) NOT NULL,
   `brand` varchar(255) DEFAULT NULL,
-  `image_id` varchar(20) DEFAULT NULL,
-  `image_link` varchar(255) DEFAULT NULL,
+  `imageId` varchar(20) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `prod_added_date` datetime DEFAULT NULL,
-  `sub_id` varchar(255) DEFAULT NULL,
+  `prodAddedDate` datetime DEFAULT NULL,
+  `subId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`code`),
-  FOREIGN KEY (sub_id) REFERENCES sub_category(id)
+  FOREIGN KEY (subId) REFERENCES subCategory(id)
 ) ENGINE=INNODB;
 
-
-
-CREATE TABLE `product_avail` (
+CREATE TABLE `productAvail` (
   `id` varchar(40) NOT NULL,
-  `total_avail_units` int(11) DEFAULT NULL,
+  `totalAvailUnits` int(11) DEFAULT NULL,
   `weight` int(11) DEFAULT NULL,
-   `weight_unit` varchar(10) NOT NULL,
+   `weightUnit` varchar(10) NOT NULL,
    `price` double NOT NULL,
-  `product_id` varchar(20) NOT NULL,
+  `productId` varchar(20) NOT NULL,
   PRIMARY KEY (`id`),
-   FOREIGN KEY (product_id) REFERENCES product(code)
+   FOREIGN KEY (productId) REFERENCES product(code)
 ) ENGINE=INNODB;
 
+ALTER TABLE sub_category
+DROP COLUMN image_link;
 
+ALTER TABLE product
+DROP COLUMN image_link;
 
-
+ALTER TABLE product
+change COLUMN image_Id  imageId varchar(255);

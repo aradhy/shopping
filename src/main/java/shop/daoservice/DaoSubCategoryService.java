@@ -13,10 +13,10 @@ import shop.model.SubCategory;
 @Repository
 public interface DaoSubCategoryService extends JpaRepository<SubCategory,String> {
 	
-	 @Query(value="select sub from SubCategory sub where sub.category_id=:categoryId")
+	 @Query(value="select sub from SubCategory sub where sub.categoryId=:categoryId")
 	List<SubCategory>  findSubCategory(@Param("categoryId") String categoryId);
 	 
-	 @Query(value="select new SubCategory(sub.id,sub.name,sub.image_id) from SubCategory sub")
+	 @Query(value="select new SubCategory(sub.id,sub.name,sub.imageId) from SubCategory sub")
 	List<SubCategory>  findAllSubCategories();
 
 }
