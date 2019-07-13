@@ -9,9 +9,6 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "Category")
@@ -23,17 +20,11 @@ public class Category {
 	protected String id;
 	protected String name;
 	protected String description;
-	@Column(name = "imageId")
-	protected String imageId;
-	@Transient
-	@JsonIgnore
-	protected String imageLink;
 
-	public Category(String id, String name, String imageId) {
+	public Category(String id, String name) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.imageId = imageId;
 	}
 
 	public Category() {
@@ -76,20 +67,5 @@ public class Category {
 		this.description = description;
 	}
 
-	public String getImageId() {
-		return imageId;
-	}
-
-	public void setImageId(String imageId) {
-		this.imageId = imageId;
-	}
-
-	public String getImageLink() {
-		return imageLink;
-	}
-
-	public void setImageLink(String imageLink) {
-		this.imageLink = imageLink;
-	}
 
 }

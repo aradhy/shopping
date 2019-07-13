@@ -6,7 +6,6 @@ public class CategoryDTO {
 	
 	private String name;
 	private String id;
-	private String imageId;
 
 
 	private List<SubCategoryDTO> subCategoryList;
@@ -34,18 +33,5 @@ public class CategoryDTO {
 		this.subCategoryList = subCategoryList;
 	}
 
-	/**
-	 * @return the imageId
-	 */
-	public String getImageId() {
-		return imageId;
-	}
-
-	/**
-	 * @param imageId the imageId to set
-	 */
-	public void setImageId(String imageId) {
-		this.imageId = imageId;
-	}
 
 }

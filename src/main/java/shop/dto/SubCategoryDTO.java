@@ -6,6 +6,7 @@ public class SubCategoryDTO {
 	private String id;
 	private String name;
 	private String imageId;
+	private String imageLink;
 	
 	public String getName() {
 		return name;
@@ -24,5 +25,17 @@ public class SubCategoryDTO {
 	}
 	public void setImageId(String imageId) {
 		this.imageId = imageId;
+	}
+	/**
+	 * @return the imageLink
+	 */
+	public String getImageLink() {
+		return imageLink;
+	}
+	/**
+	 * @param imageLink the imageLink to set
+	 */
+	public void setImageLink(String imageLink) {
+		this.imageLink = imageLink;
 	}
 }

@@ -53,13 +53,11 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		categorytDTOList= categoryList.parallelStream().map(category->convertToDTOCategory(category)).collect(Collectors.toList());
 		if(!categoryList.isEmpty())
 		{
-			Map<String, String> map =Utility.getImageLinks(getImageIdListCategory(categorytDTOList));
-			setImageLinkCategory(new HashSet<Category>(categoryList),map);
-			for(Category category:categoryList)
+			for(CategoryDTO category:categorytDTOList)
 			{
 				
-			Map<String, String> mapSubCat =Utility.getImageLinks(getImageIdListSubCategory(category.getSubCategory()));
-			setImageLinkSubCategory(category.getSubCategory(),mapSubCat);
+			Map<String, String> mapSubCat =Utility.getImageLinks(getImageIdListSubCategory(category.getSubCategoryList()));
+			setImageLinkSubCategory(category.getSubCategoryList(),mapSubCat);
 			}
 			
 		}
@@ -73,7 +71,6 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		CategoryDTO categoryDTO=new CategoryDTO();
 		categoryDTO.setId(category.getId());
 		categoryDTO.setName(category.getName());
-		categoryDTO.setImageId(category.getImageId());
 	    List<SubCategoryDTO> subCategoryList=	category.getSubCategory().parallelStream().map(sub->convertToDTOSubCategory(sub)).collect(Collectors.toList());
 	    categoryDTO.setSubCategoryList(subCategoryList);
 	    
@@ -86,30 +83,21 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		subCategoryDTO.setId(subCategory.getId());
 		subCategoryDTO.setName(subCategory.getName());
 		subCategoryDTO.setImageId(subCategory.getImageId());
+		subCategoryDTO.setImageLink(subCategory.getImageLink());
 		return subCategoryDTO;
 		
 	}
 	
 	
-	private void setImageLinkCategory(Set<Category> categoryList,Map<String, String> map)
-	{
-		categoryList.forEach(cat->cat.setImageLink("images//"+map.get(cat.getImageId())));
-	}
 	
-	private List<String>  getImageIdListCategory(List<CategoryDTO> categoryList)
-	{
-		List<String> imageIds=categoryList.parallelStream().map(category->category.getImageId().toString()).collect(Collectors.toList());
-		
-		return imageIds;
-	}
 	
-	private void setImageLinkSubCategory(Set<SubCategory> subCategoryList,Map<String, String> map)
+	private void setImageLinkSubCategory(List<SubCategoryDTO> subCategoryList,Map<String, String> map)
 	{
 		subCategoryList.forEach(sub->sub.setImageLink("images//"+map.get(sub.getImageId())));
 	}
 	
 	
-	private List<String>  getImageIdListSubCategory(Set<SubCategory> subCategoryList)
+	private List<String>  getImageIdListSubCategory(List<SubCategoryDTO> subCategoryList)
 	{
 		List<String> imageIds=subCategoryList.parallelStream().map(subCategory->subCategory.getImageId().toString()).collect(Collectors.toList());
 		
