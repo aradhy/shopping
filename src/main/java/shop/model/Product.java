@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
@@ -28,6 +29,7 @@ public class Product{
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-YYYY HH:mm:ss", locale = "en")
     protected LocalDateTime prodAddedDate=LocalDateTime.now();
 	private String brand;
+	@Column(columnDefinition = "TEXT")
     private String imageId;
 	@OneToMany(fetch=FetchType.LAZY, targetEntity=ProductAvail.class, cascade=CascadeType.ALL,mappedBy="productId")
 	@Basic(fetch=FetchType.LAZY)
@@ -77,12 +79,6 @@ public class Product{
 	 */
 	public void setName(String name) {
 		this.name = name;
-	}
-	public LocalDateTime getProd_added_date() {
-		return prodAddedDate;
-	}
-	public void setProd_added_date(LocalDateTime prodAddedDate) {
-		this.prodAddedDate = prodAddedDate;
 	}
 	public List<ProductAvail> getProductAvailList() {
 		return productAvailList;

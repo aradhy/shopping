@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,7 +56,6 @@ public class ProductFetchController {
 	@RequestMapping("/product-subCategoryId/{subCategoryId}")
 	public List<Product> getProductSubCategoryId(@PathVariable("subCategoryId") String subCategoryId) throws ParseException {
 		List<Product> productList = fetchProductService.getProductBySubCategory(subCategoryId);
-		
 		return productList;
 	}
 	
@@ -70,6 +70,7 @@ public class ProductFetchController {
 	@RequestMapping("/product-subcategory")
 	public List<Product> getProductBySubCategory(@RequestParam ("subCategoryName") String subCategoryName) throws ParseException {
 		List<Product> productList = fetchProductService.getProductBySubCategoryName(subCategoryName);
+		
 		
 		return productList;
 	}

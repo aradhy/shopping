@@ -2,7 +2,6 @@ package shop.model;
 
 import java.util.List;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,11 +9,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 @Entity
 @SequenceGenerator(name="seq", initialValue=1, allocationSize=100)
 public class SubCategory{
@@ -53,6 +48,7 @@ public class SubCategory{
 	}
 	protected String name;
 	protected String description;
+	@Column(columnDefinition = "TEXT")
 	protected String imageId;
 	@Transient
 	private String imageLink;

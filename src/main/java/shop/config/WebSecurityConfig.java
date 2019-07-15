@@ -20,7 +20,7 @@ public class WebSecurityConfig  implements WebMvcConfigurer {
 
 	        registry.addMapping("/**")
 	                .allowedOrigins(
-	                        "https://localhost:4200")
+	                        "https://localhost:4200","http://localhost:4200")
 	                .allowedMethods("GET", "POST", "PUT", "DELETE", "HEAD")
 	                .allowCredentials(true)
 	        ;
