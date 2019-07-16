@@ -23,7 +23,7 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	@Query(value="select prod from Product prod  join  ProductAvail prod_avail on prod.code=prod_avail.productId where prod.subId=:subCategoryId")
 	List<Product> findBySubId(@Param("subCategoryId") String subCategoryId);
 	
-	@Query(value="select prod from Product prod where prod.name like %:productName% or prod.brand like %:productName%")
+	@Query(value="select prod from shop.model.Product prod join shop.model.SubCategory sub  on prod.subId=sub.id join shop.model.Category cat on sub.categoryId=cat.id join shop.model.ProductAvail prodAvail on prod.code=prodAvail.productId where cat.name like %:productName% or sub.name like %:productName% or prod.name like %:productName% or prod.brand like %:productName%")
 	List<Product> findByProductName(@Param("productName") String productName);
 	
 	@Query(value="select sub from SubCategory sub  where sub.name like %:subCategoryName%")
