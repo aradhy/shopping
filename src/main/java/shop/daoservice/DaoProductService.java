@@ -23,9 +23,14 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	@Query(value="select prod from Product prod  join  ProductAvail prod_avail on prod.code=prod_avail.productId where prod.subId=:subCategoryId")
 	List<Product> findBySubId(@Param("subCategoryId") String subCategoryId);
 	
-	@Query(value="select prod from shop.model.Product prod join shop.model.SubCategory sub  on prod.subId=sub.id join shop.model.Category cat on sub.categoryId=cat.id join shop.model.ProductAvail prodAvail on prod.code=prodAvail.productId where cat.name like %:productName% or sub.name like %:productName% or prod.name like %:productName% or prod.brand like %:productName%")
+	@Query(value="select prod from shop.model.Product prod join shop.model.SubCategory sub  on prod.subId=sub.id join shop.model.Category cat on sub.categoryId=cat.id join shop.model.ProductAvail prodAvail on prod.code=prodAvail.productId where (soundex(prod.brand)=soundex(:productName) or :productName like  CONCAT('%', prod.brand,'%')) or (soundex(prod.name)=soundex(:productName) or :productName like  CONCAT('%', prod.name,'%')) or (soundex(sub.name)=soundex( :productName)\r\n" + 
+			" or :productName like  CONCAT('%', sub.name,'%')) or (soundex(cat.name)=soundex(:productName) or :productName like  CONCAT('%',  cat.name,'%') )  ORDER BY \r\n" + 
+			"    (CASE\r\n" + 
+			"        WHEN (locate(prod.brand,:productName)>0 and locate(prod.name,:productName)<0)THEN prod.name\r\n" + 
+			"  WHEN (locate(prod.brand,:productName)>0 and locate(prod.name,:productName)>0)THEN 1 "
+			+ "ELSE  prod.name \r\n" + 
+			"    END)")
 	List<Product> findByProductName(@Param("productName") String productName);
-	
 	@Query(value="select sub from SubCategory sub  where sub.name like %:subCategoryName%")
 	SubCategory findSubCategoryDetails( @Param("subCategoryName") String subCategoryName);
 	
@@ -48,8 +53,14 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	ProductDTO findByProductCodeAndAvail(@Param("productCode") String productCode,@Param("prodAvailId") String prodAvailId);
 
 
+	/*List<Product> findByProductAvailListWeightUnitAndProductAvailListWeightBetween(@Param("startWeight") Integer startWeight,@Param("endWeight") Integer endWeight ,@Param("weightUnit") String weightUnit);
+	
+	List<Product> findByProductAvailListWeightBetweenAndProductAvailListWeightUnitAndSubId(@Param("startWeight") Integer startWeight,@Param("endWeight") Integer endWeight ,@Param("weightUnit") String weightUnit,@Param("subId") String subId);
+	
+	List<Product> findByProductAvailListWeightLessThanAndWeightUnitAndSubId(@Param("weight") Integer weight,@Param("weightUnit") String weightUnit,@Param("subId") String subId);
 
+	List<Product> findByProductAvailListWeightGreaterThanAndWeightUnitAndSubId(@Param("weight") Integer weight,@Param("weightUnit") String weightUnit,@Param("subId") String subId);
 	
-	
-  
+	*/
+
 }

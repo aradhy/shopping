@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,15 +63,17 @@ public class ProductFetchController {
 	}
 	
 	@RequestMapping("/product-name")
-	public List<Product> getProductName(@RequestParam ("productName") String productName) throws ParseException {
-		List<Product> productList = fetchProductService.getProductByName(productName);
+	public List<Product> getProductName(@RequestParam ("productName") String productName) throws InterruptedException {
+		Thread.sleep(500);
+		List<Product> productList = fetchProductService.getProductByName(replaceWithPattern(productName, " "));
+	
 		
 		return productList;
 	}
 	
 	
 	@RequestMapping("/product-subcategory")
-	public List<Product> getProductBySubCategory(@RequestParam ("subCategoryName") String subCategoryName) throws ParseException {
+	public List<Product> getProductBySubCategory(@RequestParam ("subCategoryName") String subCategoryName)  {
 		List<Product> productList = fetchProductService.getProductBySubCategoryName(subCategoryName);
 		
 		
@@ -90,7 +95,7 @@ public class ProductFetchController {
 		return productList;
 	}
 	
-	@RequestMapping("/product-category/{categoryId}")
+@RequestMapping("/product-category/{categoryId}")
 	public List<Product> getProductCategoryId(@PathVariable("categoryId") String categoryId) throws ParseException {
 		List<ProductDTO> productDtoList =fetchProductService.getProductByCategory(categoryId);
 		
@@ -127,6 +132,44 @@ public class ProductFetchController {
 		return productDtoList;
 	}
 	
+
+/*
+	@RequestMapping(value="/productFilters/cat/{catId}/subId/{subId}",method = RequestMethod.GET)
+	public List<Product> getProductByGreaterThanWeightAndSubId(@PathVariable String catId,@PathVariable String subId,@RequestParam Integer[] filterValues,@RequestParam String[] filterCriteria      )
+	{
+
+        System.out.println(filterValues[0]);
+        System.out.println(filterValues[1]);
+        System.out.println(filterCriteria[0]);
+        System.out.println(filterCriteria[1]);
+        System.out.println(filterCriteria[2]);
+		return null;
+	}
+	*/
+	
+	@RequestMapping(value="/productFilter/cat/{catId}/subId/{subId}",method = RequestMethod.GET)
+	public List<Product> getProductByGreaterThanWeightAndSubId(@PathVariable String catId,@PathVariable String subId,@RequestParam Map<String,String> filterMap )
+	{
+
+        System.out.println(Integer.parseInt(filterMap.get("start")));
+        System.out.println(Integer.parseInt(filterMap.get("end")));
+        System.out.println(filterMap.get("criteria"));
+        System.out.println(filterMap.get("startUnit"));
+        System.out.println(filterMap.get("endUnit"));
+		return null;
+	}
+	
+	/*@RequestMapping(value="/productFilter/cat/{catId}/subId/{subId}",method = RequestMethod.GET)
+	public List<Product> getProductByGreaterThanWeightAndSubId(@PathVariable String catId,@PathVariable String subId,@RequestParam String value,@RequestParam String cr )
+	{
+		String [] filterValue=value.split("-");
+        System.out.println(Integer.parseInt(filterValue[0]));
+        System.out.println(filterValue[1]);
+        System.out.println(Integer.parseInt(filterValue[2]));
+        System.out.println(filterValue[3]);
+        System.out.println(cr);
+		return null;
+	}*/
 	
 	Product convertProductDTOToProduct(Product product,ProductDTO productDTO)
 	{
@@ -166,4 +209,13 @@ public class ProductFetchController {
 		return product;
 		
 	}
+	
+	public String replaceWithPattern(String str,String replace){
+	    
+	    Pattern ptn = Pattern.compile("\\s+");
+	    Matcher mtch = ptn.matcher(str);
+	    return mtch.replaceAll(replace);
+	}
 }
+
+

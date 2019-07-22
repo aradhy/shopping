@@ -14,6 +14,7 @@ import shop.model.Product;
 @EntityScan(basePackageClasses=Product.class)
 @EnableJpaRepositories(basePackages="shop.daoservice")
 public class ShopBoot {
+	
 
 	public static void main(String[] args) {
 		SpringApplication.run(ShopBoot.class, args);
