@@ -19,7 +19,6 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:code")
     List<ProductDTO> findByProductCode(@Param("code") String code);
 
-	//@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId join SubCategory subCat on prod.subId=subCat.id where subCat.id=:subCategoryId")
 	@Query(value="select prod from Product prod  join  ProductAvail prod_avail on prod.code=prod_avail.productId where prod.subId=:subCategoryId")
 	List<Product> findBySubId(@Param("subCategoryId") String subCategoryId);
 	
@@ -52,15 +51,5 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	@Query(value="select new shop.dto.ProductDTO(prod_avail.id,prod.code,prod.name,prod.brand,prod.imageId,prod_avail.price,prod_avail.weight,prod_avail.weightUnit) from Product prod left join ProductAvail prod_avail on prod.code=prod_avail.productId  where prod.code=:productCode and prod_avail.id=:prodAvailId")
 	ProductDTO findByProductCodeAndAvail(@Param("productCode") String productCode,@Param("prodAvailId") String prodAvailId);
 
-
-	/*List<Product> findByProductAvailListWeightUnitAndProductAvailListWeightBetween(@Param("startWeight") Integer startWeight,@Param("endWeight") Integer endWeight ,@Param("weightUnit") String weightUnit);
-	
-	List<Product> findByProductAvailListWeightBetweenAndProductAvailListWeightUnitAndSubId(@Param("startWeight") Integer startWeight,@Param("endWeight") Integer endWeight ,@Param("weightUnit") String weightUnit,@Param("subId") String subId);
-	
-	List<Product> findByProductAvailListWeightLessThanAndWeightUnitAndSubId(@Param("weight") Integer weight,@Param("weightUnit") String weightUnit,@Param("subId") String subId);
-
-	List<Product> findByProductAvailListWeightGreaterThanAndWeightUnitAndSubId(@Param("weight") Integer weight,@Param("weightUnit") String weightUnit,@Param("subId") String subId);
-	
-	*/
 
 }
