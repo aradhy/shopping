@@ -8,35 +8,49 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(value = Include.NON_NULL)
 public class FilterMetaData {
-	private List<String> priceFilters = new ArrayList<String>();
-	private List<String> weightFilters = new ArrayList<String>();
+	
+    private String filterCriteria;
+	private List<PriceFilterMetaData> priceFilters = new ArrayList<PriceFilterMetaData>();
+	private List<WeightFilterMetaData> weightFilters = new ArrayList<WeightFilterMetaData>();
 
 	/**
 	 * @return the priceFilters
 	 */
-	public List<String> getPriceFilters() {
+	public List<PriceFilterMetaData> getPriceFilters() {
 		return priceFilters;
 	}
 
 	/**
 	 * @param priceFilters the priceFilters to set
 	 */
-	public void setPriceFilters(List<String> priceFilters) {
+	public void setPriceFilters(List<PriceFilterMetaData> priceFilters) {
 		this.priceFilters = priceFilters;
 	}
 
 	/**
 	 * @return the weightFilters
 	 */
-	public List<String> getWeightFilters() {
+	public List<WeightFilterMetaData> getWeightFilters() {
 		return weightFilters;
 	}
 
 	/**
 	 * @param weightFilters the weightFilters to set
 	 */
-	public void setWeightFilters(List<String> weightFilters) {
+	public void setWeightFilters(List<WeightFilterMetaData> weightFilters) {
 		this.weightFilters = weightFilters;
 	}
 
+	/**
+	 * @return the filterCriteria
+	 */
+	public String getFilterCriteria() {
+		return filterCriteria;
+	}
+	/**
+	 * @param filterCriteria the filterCriteria to set
+	 */
+	public void setFilterCriteria(String filterCriteria) {
+		this.filterCriteria = filterCriteria;
+	}
 }

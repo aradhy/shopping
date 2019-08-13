@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import javax.persistence.EntityManager;
@@ -28,9 +27,11 @@ import shop.dto.ProductDTO;
 import shop.model.Category;
 import shop.model.CriteriaBuilderModel;
 import shop.model.FilterMetaData;
+import shop.model.PriceFilterMetaData;
 import shop.model.Product;
 import shop.model.ProductAvail;
 import shop.model.SubCategory;
+import shop.model.WeightFilterMetaData;
 
 @Service
 public class FetchProductService {
@@ -334,13 +335,14 @@ public class FetchProductService {
 		
 		cbmodel.getQuery().where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 		List<Product> prodList=  em.createQuery(cbmodel.getQuery()).getResultList();
-		List<String> filterWeightIntervalList = new ArrayList<>();
-		List<String> filterPriceIntervalList=new ArrayList<>();
+		List<WeightFilterMetaData> filterWeightIntervalList = new ArrayList<>();
+		List<PriceFilterMetaData> filterPriceIntervalList=new ArrayList<>();
 		
 		prodList.forEach(prod->filterWeightIntervalList.addAll(fetchWeightIntervals(prod)));
 		if(!prodList.isEmpty())
 		filterPriceIntervalList= processPriceIntervals(prodList.get(0).getMinPrice(),prodList.get(0).getMaxPrice());	
 		FilterMetaData filterMetaData=new FilterMetaData();
+		filterMetaData.setFilterCriteria("bw");
 		filterMetaData.setPriceFilters(filterPriceIntervalList);
 		filterMetaData.setWeightFilters(filterWeightIntervalList);
 		
@@ -350,24 +352,29 @@ public class FetchProductService {
 	
 
 	
-	List<String> fetchPriceIntervals(int min, int max, int diff) {
+	List<PriceFilterMetaData> fetchPriceIntervals(int min, int max, int diff) {
 		
 		
 		
-		List<String> list = new ArrayList<>();
+		List<PriceFilterMetaData> list = new ArrayList<>();
 		int maxd = 0;
 
 		maxd = (min + diff);
 		while (min < max) {
+			PriceFilterMetaData priceFilterMetaData=new PriceFilterMetaData();
 			if (maxd > max) {
-				String val = "Rs " + min + "-" + " Rs " + max;
-				list.add(val);
+				priceFilterMetaData.setMax(max);
+				priceFilterMetaData.setMin(min);
+				list.add(priceFilterMetaData);
 				return list;
 			}
-			String val = "Rs " + min + "-" + " Rs " + maxd;
+			
 			min = maxd;
 			maxd = maxd + diff;
-			list.add(val);
+			priceFilterMetaData.setMax(max);
+			priceFilterMetaData.setMin(min);
+			list.add(priceFilterMetaData);
+			
 
 		}
 
@@ -375,7 +382,7 @@ public class FetchProductService {
 	}
 	
 	
-	public List<String> processPriceIntervals(Double minPrice,Double maxPrice)
+	public List<PriceFilterMetaData> processPriceIntervals(Double minPrice,Double maxPrice)
 	{
 		int maxPriceRoundOff;
 		
@@ -392,7 +399,7 @@ public class FetchProductService {
 	}
 	
 	
-	List<String> fetchWeightIntervals(Product prod)
+	List<WeightFilterMetaData> fetchWeightIntervals(Product prod)
 	{
 		
 		if(prod.getWeightUnit().equals("kg") || prod.getWeightUnit().equals("litre"))
@@ -407,19 +414,23 @@ public class FetchProductService {
 		
 	}
 	
-	 List<String> fetchGreaterWeightUnitsIntervals(int minWeight, int maxWeight, String weightUnit) {
-
-			List<String> listWeight = new ArrayList<>();
+	 List<WeightFilterMetaData> fetchGreaterWeightUnitsIntervals(int minWeight, int maxWeight, String weightUnit) {
+		 WeightFilterMetaData weightFilterMetaData=new WeightFilterMetaData();
+			List<WeightFilterMetaData> listWeight = new ArrayList<>();
 			if(minWeight==maxWeight)
 			{
-				listWeight.add(minWeight+" "+weightUnit);
+				weightFilterMetaData.setStartWeight(minWeight);
+				weightFilterMetaData.setStartWeightUnit(weightUnit);
+				listWeight.add(weightFilterMetaData);
 				return listWeight;
 			}
 			for (int i = 1; i <= 5; i++) {
 				OptionalLong containsValue = LongStream.rangeClosed(i, 5 * i).filter(p -> p == maxWeight).findAny();
-				String w1 = minWeight + weightUnit;
-				String w2 = 5 * i + weightUnit;
-				listWeight.add(w1 + "-" + w2);
+				weightFilterMetaData.setStartWeight(minWeight);
+				weightFilterMetaData.setStartWeightUnit(weightUnit);
+				weightFilterMetaData.setEndWeight(5 * i);
+				weightFilterMetaData.setEndWeightUnit(weightUnit);
+				listWeight.add(weightFilterMetaData);
 				minWeight = 5 * i;
 				if (containsValue.isPresent()) {
 					break;
@@ -430,12 +441,13 @@ public class FetchProductService {
 			return listWeight;
 		}
 
-	 List<String> fetchSmallerWeightUnitsIntervals(int minWeight, int maxWeight, String weightUnit) {
+	 List<WeightFilterMetaData> fetchSmallerWeightUnitsIntervals(int minWeight, int maxWeight, String weightUnit) {
 			CheckWeightUnitService checkUnitService = new CheckWeightUnitService();
 			int weightInGramArray[] = {50, 100, 150, 200, 250, 500, 1000 };
-			List<String> listWeight = new ArrayList<>();
+			List<WeightFilterMetaData> listWeight = new ArrayList<>();
 			int temp = minWeight;
 			int counter = 0;
+			
 			for (int i = 1; i < weightInGramArray.length; i++) {
 				OptionalLong containsValue = LongStream.rangeClosed(weightInGramArray[i - 1], weightInGramArray[i])
 						.filter(p -> p == minWeight).findAny();
@@ -443,15 +455,25 @@ public class FetchProductService {
 						|| (minWeight < weightInGramArray[i] && minWeight <= weightInGramArray[i - 1])) {
 					containsValue = LongStream.rangeClosed(weightInGramArray[i - 1], weightInGramArray[i])
 							.filter(p -> p == maxWeight).findAny();
-					String w2 = "";
+					WeightFilterMetaData weightFilterMetaData=new WeightFilterMetaData();
+					Integer  wMax ;
 					if (counter != 0)
 						temp = weightInGramArray[i - 1];
-					String w1 = temp + weightUnit;
+					weightFilterMetaData.setStartWeight(temp);
+					weightFilterMetaData.setStartWeightUnit(weightUnit);
 					if (weightInGramArray[i] == 1000)
-						w2 = (weightInGramArray[i] / 1000) + checkUnitService.checkForGreaterWeightUnit(weightUnit);
+					{
+						wMax = (weightInGramArray[i] / 1000) ;
+						weightFilterMetaData.setEndWeight(wMax);
+						weightFilterMetaData.setEndWeightUnit(checkUnitService.checkForGreaterWeightUnit(weightUnit));
+						
+					}
 					else
-						w2 = (weightInGramArray[i]) + weightUnit;
-					listWeight.add(w1 + " - " + w2);
+						wMax = (weightInGramArray[i]) ;
+					    weightFilterMetaData.setEndWeight(wMax);
+						weightFilterMetaData.setEndWeightUnit(weightUnit);
+
+					listWeight.add(weightFilterMetaData);
 
 					if (containsValue.isPresent()) {
 						break;
