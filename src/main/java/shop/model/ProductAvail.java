@@ -4,9 +4,14 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Entity
 @Table(name="ProductAvail")
+@JsonInclude(value=Include.NON_NULL)
 public class ProductAvail {
 	
    	@Id
@@ -18,6 +23,8 @@ public class ProductAvail {
 	private String weightUnit;
 	private Double price;
 
+	@Transient
+	private Integer maxWeight;
 
 	public String getProductId() {
 		return productId;
@@ -57,6 +64,17 @@ public class ProductAvail {
 		this.weightUnit = weightUnit;
 	}
 	
-	
+	/**
+	 * @return the maxWeight
+	 */
+	public Integer getMaxWeight() {
+		return maxWeight;
+	}
+	/**
+	 * @param maxWeight the maxWeight to set
+	 */
+	public void setMaxWeight(Integer maxWeight) {
+		this.maxWeight = maxWeight;
+	}
 
 }

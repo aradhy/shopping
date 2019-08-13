@@ -8,7 +8,7 @@ public class CheckWeightUnitService {
 	Map<String,String> weightUnitMap=new HashMap<String,String>();
 	
 	
-	CheckWeightUnitService()
+	public CheckWeightUnitService()
 	{
 		weightUnitMap.put("kg","gram");
 		weightUnitMap.put("gram","mg");
@@ -17,7 +17,7 @@ public class CheckWeightUnitService {
 
 	
 	
-	String checkForSmallerWeightUnit(String weightUnit)
+	public String checkForSmallerWeightUnit(String weightUnit)
 	{
 		
 		if(weightUnitMap.containsKey(weightUnit))
@@ -29,7 +29,7 @@ public class CheckWeightUnitService {
 		
 	}
 	
-	String checkForGreaterWeightUnit(String weightUnit)
+	public String checkForGreaterWeightUnit(String weightUnit)
 	{
 		
 		  for(Map.Entry<String,String> entry: weightUnitMap.entrySet()){

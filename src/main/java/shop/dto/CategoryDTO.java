@@ -1,14 +1,27 @@
 package shop.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryDTO {
 	
-	private String name;
+	public CategoryDTO(String id, String name) {
+		super();
+		this.id = id;
+		this.name = name;
+	}
+
 	private String id;
+	public CategoryDTO() {
+		super();
+		
+	}
+
+	private String name;
 
 
-	private List<SubCategoryDTO> subCategoryList;
+
+	private List<SubCategoryDTO> subCategory=new ArrayList<>();
 	
 	public String getName() {
 		return name;
@@ -25,12 +38,19 @@ public class CategoryDTO {
 	public void setId(String id) {
 		this.id = id;
 	}
-	public List<SubCategoryDTO> getSubCategoryList() {
-		return subCategoryList;
+
+	/**
+	 * @return the subCategory
+	 */
+	public List<SubCategoryDTO> getSubCategory() {
+		return subCategory;
 	}
 
-	public void setSubCategoryList(List<SubCategoryDTO> subCategoryList) {
-		this.subCategoryList = subCategoryList;
+	/**
+	 * @param subCategory the subCategory to set
+	 */
+	public void setSubCategory(List<SubCategoryDTO> subCategory) {
+		this.subCategory = subCategory;
 	}
 
 

@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,6 +27,7 @@ import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
 import shop.model.Category;
 import shop.model.CriteriaBuilderModel;
+import shop.model.FilterMetaData;
 import shop.model.Product;
 import shop.model.ProductAvail;
 import shop.model.SubCategory;
@@ -310,4 +314,158 @@ public class FetchProductService {
 		criterBuilderModel.getQuery().where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 		return em.createQuery(criterBuilderModel.getQuery()).getResultList();
 	}
+	
+	
+	public FilterMetaData getFiltersBasedOnCategoryAndSubCategoryId(String categoryId,String subId)
+	{
+		CriteriaBuilderModel cbmodel = getQueryBuilder();
+		CriteriaBuilder cb = cbmodel.getCb();
+		CriteriaQuery<Product> query = cbmodel.getQuery();
+		Join<SubCategory, Product> prodSubJoin = cbmodel.getProdSubJoin();
+		Join<ProductAvail, Product> prodAvail = cbmodel.getProdAvail();
+		query.multiselect(cb.max(prodAvail.get("weight")),cb.min(prodAvail.get("weight")),cb.min(prodAvail.get("weightUnit")),cb.max(prodAvail.get("price")),cb.min(prodAvail.get("price")));
+		query.groupBy(prodAvail.get("weightUnit"));
+		List<Predicate> criteria = new ArrayList<Predicate>();
+		
+		if(isNotNullOrEmpty(categoryId))
+		criteria.add(cb.equal(cbmodel.getSubRoot().get("categoryId"),categoryId));
+		if(isNotNullOrEmpty(subId))
+		criteria.add(cb.equal(prodSubJoin.get("subId"),subId));
+		
+		cbmodel.getQuery().where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
+		List<Product> prodList=  em.createQuery(cbmodel.getQuery()).getResultList();
+		List<String> filterWeightIntervalList = new ArrayList<>();
+		List<String> filterPriceIntervalList=new ArrayList<>();
+		
+		prodList.forEach(prod->filterWeightIntervalList.addAll(fetchWeightIntervals(prod)));
+		if(!prodList.isEmpty())
+		filterPriceIntervalList= processPriceIntervals(prodList.get(0).getMinPrice(),prodList.get(0).getMaxPrice());	
+		FilterMetaData filterMetaData=new FilterMetaData();
+		filterMetaData.setPriceFilters(filterPriceIntervalList);
+		filterMetaData.setWeightFilters(filterWeightIntervalList);
+		
+		
+		return filterMetaData;
+	}
+	
+
+	
+	List<String> fetchPriceIntervals(int min, int max, int diff) {
+		
+		
+		
+		List<String> list = new ArrayList<>();
+		int maxd = 0;
+
+		maxd = (min + diff);
+		while (min < max) {
+			if (maxd > max) {
+				String val = "Rs " + min + "-" + " Rs " + max;
+				list.add(val);
+				return list;
+			}
+			String val = "Rs " + min + "-" + " Rs " + maxd;
+			min = maxd;
+			maxd = maxd + diff;
+			list.add(val);
+
+		}
+
+		return list;
+	}
+	
+	
+	public List<String> processPriceIntervals(Double minPrice,Double maxPrice)
+	{
+		int maxPriceRoundOff;
+		
+		String doubleMaxString=maxPrice.toString();
+		if(!doubleMaxString.substring(doubleMaxString.indexOf(".")+1,doubleMaxString.indexOf(".")+2).equals("0"))
+		{
+			maxPriceRoundOff=Integer.valueOf(maxPrice.intValue())+1;
+		}
+		else
+		{
+			maxPriceRoundOff=Integer.valueOf(maxPrice.intValue());
+		}
+		return fetchPriceIntervals(minPrice.intValue(),maxPriceRoundOff, 50);
+	}
+	
+	
+	List<String> fetchWeightIntervals(Product prod)
+	{
+		
+		if(prod.getWeightUnit().equals("kg") || prod.getWeightUnit().equals("litre"))
+		{
+			return fetchGreaterWeightUnitsIntervals(prod.getMinWeight(),prod.getMaxWeight(),prod.getWeightUnit());
+		}
+		else
+		{
+			return fetchSmallerWeightUnitsIntervals(prod.getMinWeight(),prod.getMaxWeight(),prod.getWeightUnit());
+		}
+		
+		
+	}
+	
+	 List<String> fetchGreaterWeightUnitsIntervals(int minWeight, int maxWeight, String weightUnit) {
+
+			List<String> listWeight = new ArrayList<>();
+			if(minWeight==maxWeight)
+			{
+				listWeight.add(minWeight+" "+weightUnit);
+				return listWeight;
+			}
+			for (int i = 1; i <= 5; i++) {
+				OptionalLong containsValue = LongStream.rangeClosed(i, 5 * i).filter(p -> p == maxWeight).findAny();
+				String w1 = minWeight + weightUnit;
+				String w2 = 5 * i + weightUnit;
+				listWeight.add(w1 + "-" + w2);
+				minWeight = 5 * i;
+				if (containsValue.isPresent()) {
+					break;
+
+				}
+			}
+
+			return listWeight;
+		}
+
+	 List<String> fetchSmallerWeightUnitsIntervals(int minWeight, int maxWeight, String weightUnit) {
+			CheckWeightUnitService checkUnitService = new CheckWeightUnitService();
+			int weightInGramArray[] = {50, 100, 150, 200, 250, 500, 1000 };
+			List<String> listWeight = new ArrayList<>();
+			int temp = minWeight;
+			int counter = 0;
+			for (int i = 1; i < weightInGramArray.length; i++) {
+				OptionalLong containsValue = LongStream.rangeClosed(weightInGramArray[i - 1], weightInGramArray[i])
+						.filter(p -> p == minWeight).findAny();
+				if ((containsValue.isPresent() && weightInGramArray[i] > minWeight)
+						|| (minWeight < weightInGramArray[i] && minWeight <= weightInGramArray[i - 1])) {
+					containsValue = LongStream.rangeClosed(weightInGramArray[i - 1], weightInGramArray[i])
+							.filter(p -> p == maxWeight).findAny();
+					String w2 = "";
+					if (counter != 0)
+						temp = weightInGramArray[i - 1];
+					String w1 = temp + weightUnit;
+					if (weightInGramArray[i] == 1000)
+						w2 = (weightInGramArray[i] / 1000) + checkUnitService.checkForGreaterWeightUnit(weightUnit);
+					else
+						w2 = (weightInGramArray[i]) + weightUnit;
+					listWeight.add(w1 + " - " + w2);
+
+					if (containsValue.isPresent()) {
+						break;
+
+					}
+
+					counter++;
+				}
+
+			}
+			
+
+			return listWeight;
+		}
+	
+	
 }

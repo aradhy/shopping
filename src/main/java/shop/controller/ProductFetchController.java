@@ -1,20 +1,12 @@
 package shop.controller;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
-import shop.model.CriteriaBuilderModel;
+import shop.model.Category;
+import shop.model.FilterMetaData;
 import shop.model.Product;
-import shop.model.ProductAvail;
-import shop.model.SubCategory;
 import shop.service.FetchProductService;
 import shop.service.FetchSubCategoryService;
 
@@ -118,7 +109,13 @@ public class ProductFetchController {
 
 		return fetchProductService.getProductBasedOnFilter(catId, subId, filterMap);
 	}
+	
+	@RequestMapping(value = "/filterIntervals", method = RequestMethod.GET)
+	public FilterMetaData WeightBasedOnFilters(@RequestParam Map<String, String> filterMap) {
 
+		return fetchProductService.getFiltersBasedOnCategoryAndSubCategoryId(filterMap.get("catId"),
+				filterMap.get("subId"));
+	}
 
 	public String replaceWithPattern(String str, String replace) {
 

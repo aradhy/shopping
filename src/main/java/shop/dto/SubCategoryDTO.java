@@ -1,5 +1,9 @@
 package shop.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(value=Include.NON_NULL)
 public class SubCategoryDTO {
 	
 	
@@ -38,4 +42,26 @@ public class SubCategoryDTO {
 	public void setImageLink(String imageLink) {
 		this.imageLink = imageLink;
 	}
+	@Override
+	public int hashCode()
+	{
+		return this.id.hashCode()+this.name.hashCode();
+		
+	}
+	@Override
+	public boolean equals(Object obj)
+	{
+		SubCategoryDTO sub=(SubCategoryDTO)obj;
+		if(this.id==null || sub.id==null)
+		{
+			return true;
+		}
+		if(this.id.equals(sub.id))
+		{
+			return true;
+		}
+		return false;
+		
+	}
+	
 }

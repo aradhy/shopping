@@ -73,6 +73,7 @@ public class SubCategory{
 	
 	private String categoryId;
 
+
 	public String getCategoryId() {
 		return categoryId;
 	}
