@@ -1,5 +1,6 @@
 package shop.controller;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
 import shop.model.Category;
@@ -27,6 +32,7 @@ import shop.model.FilterMetaData;
 import shop.model.Product;
 import shop.service.FetchProductService;
 import shop.service.FetchSubCategoryService;
+import shop.util.FilterParamParser;
 
 @RestController
 public class ProductFetchController {
@@ -103,18 +109,28 @@ public class ProductFetchController {
 		return productDtoList;
 	}
 
-	@RequestMapping(value = "/productFilter/cat/{catId}/subId/{subId}", method = RequestMethod.GET)
-	public List<Product> productFilters(@PathVariable String catId, @PathVariable String subId,
-			@RequestParam Map<String, String> filterMap) {
+	@RequestMapping(value = "/productFilter/cat/{catId}", method = RequestMethod.GET)
+	public List<Product> productFilters(@PathVariable String catId,
+			@RequestParam(value = "subId", required = false) String subId,
+			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
+			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
+			@RequestParam(value = "brandFilters", required = false) List<String> brandFilters) {
 
-		return fetchProductService.getProductBasedOnFilter(catId, subId, filterMap);
+		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
+		return fetchProductService.getProductBasedOnFilter(catId, subId, filterMetaData);
+
 	}
-	
-	@RequestMapping(value = "/filterIntervals", method = RequestMethod.GET)
-	public FilterMetaData WeightBasedOnFilters(@RequestParam Map<String, String> filterMap) {
 
-		return fetchProductService.getFiltersBasedOnCategoryAndSubCategoryId(filterMap.get("catId"),
-				filterMap.get("subId"));
+	@RequestMapping(value = "/filterIntervals/cat/{catId}", method = RequestMethod.GET)
+	public FilterMetaData WeightBasedOnFilters(@PathVariable String catId,
+			@RequestParam(value = "subId", required = false) String subId,
+			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
+			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
+			@RequestParam(value = "brandFilters", required = false) List<String> brandFilters) {
+
+		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
+		return fetchProductService.getFiltersBasedOnCategoryAndSubCategoryId(catId,
+				subId,filterMetaData);
 	}
 
 	public String replaceWithPattern(String str, String replace) {

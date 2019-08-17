@@ -40,19 +40,45 @@ public class Product {
 	private List<ProductAvail> productAvailList;
 	@Transient
 	@JsonIgnore
-	private int minWeight;
+	private Integer weight;
 	@Transient
 	@JsonIgnore
 	private String weightUnit;
+	
+	/**
+	 * @return the maxWeight
+	 */
+	public Integer getWeight() {
+		return weight;
+	}
+
+	/**
+	 * @param maxWeight the maxWeight to set
+	 */
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
+
+	/**
+	 * @return the minPrice
+	 */
+	public Double getPrice() {
+		return price;
+	}
+
+	/**
+	 * @param minPrice the minPrice to set
+	 */
+	public void setPrice(Double price) {
+		this.price = price;
+	}
+
 	@Transient
 	@JsonIgnore
-	private int maxWeight;
+	private Double price;
 	@Transient
 	@JsonIgnore
-	private Double minPrice;
-	@Transient
-	@JsonIgnore
-	private Double maxPrice;
+	private Long count;
 
 	
 	public Product()
@@ -64,47 +90,9 @@ public class Product {
 		return brand;
 	}
 
-	/**
-	 * @return the minWeight
-	 */
-	public int getMinWeight() {
-		return minWeight;
-	}
 
-	/**
-	 * @return the minPrice
-	 */
-	public Double getMinPrice() {
-		return minPrice;
-	}
 
-	/**
-	 * @param minPrice the minPrice to set
-	 */
-	public void setMinPrice(Double minPrice) {
-		this.minPrice = minPrice;
-	}
 
-	/**
-	 * @return the maxPrice
-	 */
-	public Double getMaxPrice() {
-		return maxPrice;
-	}
-
-	/**
-	 * @param maxPrice the maxPrice to set
-	 */
-	public void setMaxPrice(Double maxPrice) {
-		this.maxPrice = maxPrice;
-	}
-
-	/**
-	 * @param minWeight the minWeight to set
-	 */
-	public void setMinWeight(int minWeight) {
-		this.minWeight = minWeight;
-	}
 
 	/**
 	 * @return the weightUnit
@@ -121,19 +109,6 @@ public class Product {
 		this.weightUnit = weightUnit;
 	}
 
-	/**
-	 * @return the maxWeight
-	 */
-	public int getMaxWeight() {
-		return maxWeight;
-	}
-
-	/**
-	 * @param maxWeight the maxWeight to set
-	 */
-	public void setMaxWeight(int maxWeight) {
-		this.maxWeight = maxWeight;
-	}
 
 	public void setBrand(String brand) {
 		this.brand = brand;
@@ -191,12 +166,11 @@ public class Product {
 		this.productAvailList = productAvailList;
 	}
 
-	public Product(int maxWeight, int minWeight, String weightUnit,Double maxPrice, Double minPrice) {
-		this.minWeight = minWeight;
-		this.maxWeight = maxWeight;
+	public Product(Integer weight,String weightUnit,Double price) {
+		
+		this.weight = weight;
 		this.weightUnit = weightUnit;
-		this.minPrice = minPrice;
-		this.maxPrice = maxPrice;
+		this.price=price;
 	}
 
 
