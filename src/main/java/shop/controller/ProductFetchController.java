@@ -1,9 +1,7 @@
 package shop.controller;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,15 +19,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
-import shop.model.Category;
 import shop.model.FilterMetaData;
 import shop.model.Product;
+import shop.model.ProductFilterData;
 import shop.service.FetchProductService;
 import shop.service.FetchSubCategoryService;
 import shop.util.FilterParamParser;
@@ -122,7 +116,7 @@ public class ProductFetchController {
 	}
 
 	@RequestMapping(value = "/filterIntervals/cat/{catId}", method = RequestMethod.GET)
-	public FilterMetaData WeightBasedOnFilters(@PathVariable String catId,
+	public ProductFilterData WeightBasedOnFilters(@PathVariable String catId,
 			@RequestParam(value = "subId", required = false) String subId,
 			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
 			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,

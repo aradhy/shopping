@@ -1,8 +1,6 @@
 package shop.model;
 
-import shop.util.Range;
-
-public class PriceFilterMetaData {
+public class PriceFilterMetaData implements Comparable<PriceFilterMetaData>{
 	
 	private Integer v1;
 	private Integer v2;
@@ -77,4 +75,11 @@ public class PriceFilterMetaData {
 		return this.v1.hashCode()+this.v2.hashCode();
 		
 	}
+	
+	public int compareTo(PriceFilterMetaData priceFilterMetaData) {
+	      
+	       return this.getV1()-priceFilterMetaData.getV1();
+
+	    }
+
 }

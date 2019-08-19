@@ -34,6 +34,8 @@ import shop.model.FilterMetaData;
 import shop.model.PriceFilterMetaData;
 import shop.model.Product;
 import shop.model.ProductAvail;
+import shop.model.ProductDataModel;
+import shop.model.ProductFilterData;
 import shop.model.SubCategory;
 import shop.model.WeightFilterMetaData;
 import shop.util.Range;
@@ -113,10 +115,10 @@ public class FetchProductService {
 
 		CriteriaBuilderModel cbmodel = getQueryBuilder();
 		CriteriaBuilder cb = cbmodel.getCb();
-		CriteriaQuery<Product> query = cbmodel.getQuery();
+		CriteriaQuery<ProductDataModel> query = cbmodel.getQuery();
 		Join<SubCategory, Product> prodSubJoin = cbmodel.getProdSubJoin();
 		Join<ProductAvail, Product> prodAvail = cbmodel.getProdAvail();
-		query.select(prodSubJoin);
+		//query.select(prodSubJoin);
 		List<Predicate> criteria = new ArrayList<Predicate>();
 		if (catId != null)
 			criteria.add(cb.equal(cbmodel.getSubRoot().get("categoryId"), catId));
@@ -145,7 +147,7 @@ public class FetchProductService {
 		query = query.orderBy(order1, order2, order3);
 		query.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 
-		List<Product> listPod = em.createQuery(query).getResultList();
+		List<Product> listPod = null;
 		return listPod;
 	}
 
@@ -309,11 +311,11 @@ public class FetchProductService {
 	public CriteriaBuilderModel getQueryBuilder() {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		CriteriaQuery<Product> query = cb.createQuery(Product.class);
+		CriteriaQuery<ProductDataModel> query = cb.createQuery(ProductDataModel.class);
 		Root<SubCategory> subRoot = query.from(SubCategory.class);
 		Join<SubCategory, Product> prodSubJoin = subRoot.join("productList");
 		Join<ProductAvail, Product> prodAvail = prodSubJoin.join("productAvailList");
-		query.select(prodSubJoin);
+		
 		CriteriaBuilderModel criterBuilderModel = new CriteriaBuilderModel(cb, query, prodSubJoin, prodAvail);
 		criterBuilderModel.setSubRoot(subRoot);
 
@@ -327,17 +329,18 @@ public class FetchProductService {
 		CriteriaBuilder cb = criterBuilderModel.getCb();
 		criteria.add(cb.equal(subRoot.get("categoryId"), catId));
 		criterBuilderModel.getQuery().where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
-		return em.createQuery(criterBuilderModel.getQuery()).getResultList();
+		//return em.createQuery(criterBuilderModel.getQuery()).getResultList();
+		return null;
 	}
 
-	public FilterMetaData getFiltersBasedOnCategoryAndSubCategoryId(String categoryId, String subId,
+	public ProductFilterData getFiltersBasedOnCategoryAndSubCategoryId(String categoryId, String subId,
 			FilterMetaData filterMetaData) {
 		CriteriaBuilderModel cbmodel = getQueryBuilder();
 		CriteriaBuilder cb = cbmodel.getCb();
-		CriteriaQuery<Product> query = cbmodel.getQuery();
+		CriteriaQuery<ProductDataModel> query = cbmodel.getQuery();
 		Join<SubCategory, Product> prodSubJoin = cbmodel.getProdSubJoin();
 		Join<ProductAvail, Product> prodAvail = cbmodel.getProdAvail();
-		query.multiselect(prodAvail.get("weight"), prodAvail.get("weightUnit"), prodAvail.get("price"));
+		query.multiselect(prodSubJoin,prodAvail.get("weight"), prodAvail.get("weightUnit"), prodAvail.get("price"));
 
 		List<Predicate> criteria = new ArrayList<Predicate>();
 		if (categoryId != null)
@@ -365,7 +368,7 @@ public class FetchProductService {
 		query = query.orderBy(order1);
 		query.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 
-		List<Product> prodList = em.createQuery(query).getResultList();
+		List<ProductDataModel> prodList = em.createQuery(query).getResultList();
 
 		Map<String, Set<Integer>> map = new HashMap<>();
 		prodList.forEach(prod -> {
@@ -410,12 +413,14 @@ public class FetchProductService {
 		}
 
 		Set<PriceFilterMetaData> filterPriceIntervalList = prodList.stream()
-				.map(prod -> fetchPriceIntervals(prod.getPrice())).collect(Collectors.toSet());
+				.map(prod -> fetchPriceIntervals(prod.getPrice())).sorted().collect(Collectors.toSet());
 		filterMetaData = new FilterMetaData();
 		filterMetaData.setPriceFilters(filterPriceIntervalList);
 		filterMetaData.setWeightFilters(filterWeightIntervalList);
-
-		return filterMetaData;
+        ProductFilterData productFilterData=new ProductFilterData();
+        productFilterData.setProduct(prodList);
+        productFilterData.setFilterMetaData(filterMetaData);
+		return productFilterData;
 	}
 
 	public PriceFilterMetaData fetchPriceIntervals(Double price) {

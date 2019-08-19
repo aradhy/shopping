@@ -12,8 +12,8 @@ public class CriteriaBuilderModel {
 	Join<ProductAvail, Product> prodAvail;
 	CriteriaBuilder cb;
 
-	CriteriaQuery<Product> query;
-	public CriteriaBuilderModel(CriteriaBuilder cb, CriteriaQuery<Product> query,
+	CriteriaQuery<ProductDataModel> query;
+	public CriteriaBuilderModel(CriteriaBuilder cb, CriteriaQuery<ProductDataModel> query,
 			Join<SubCategory, Product> prodSubJoin, Join<ProductAvail, Product> prodAvail) {
 		this.cb=cb;
 		this.query=query;
@@ -73,13 +73,13 @@ public class CriteriaBuilderModel {
 	/**
 	 * @return the query
 	 */
-	public CriteriaQuery<Product> getQuery() {
+	public CriteriaQuery<ProductDataModel> getQuery() {
 		return query;
 	}
 	/**
 	 * @param query the query to set
 	 */
-	public void setQuery(CriteriaQuery<Product> query) {
+	public void setQuery(CriteriaQuery<ProductDataModel> query) {
 		this.query = query;
 	}
 	
