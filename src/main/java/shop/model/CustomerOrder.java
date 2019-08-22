@@ -10,6 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -28,7 +29,8 @@ public class CustomerOrder {
 	private String orderDetails;
 	
 	@OneToOne(cascade = CascadeType.ALL)
-	private Integer orderStatusId;
+    @JoinColumn(name="orderStatusId",unique = true)
+	private OrderStatusDTO orderStatus;
 	@OneToMany(fetch = FetchType.LAZY, targetEntity = OrderItem.class, cascade = CascadeType.ALL, mappedBy = "orderId")
 	private List<OrderItem> listOrderItem = new ArrayList<>();
 
@@ -37,20 +39,6 @@ public class CustomerOrder {
 	 */
 	public Long getId() {
 		return id;
-	}
-
-	/**
-	 * @return the orderStatusId
-	 */
-	public Integer getOrderStatusId() {
-		return orderStatusId;
-	}
-
-	/**
-	 * @param orderStatusId the orderStatusId to set
-	 */
-	public void setOrderStatusId(Integer orderStatusId) {
-		this.orderStatusId = orderStatusId;
 	}
 
 	/**
@@ -106,6 +94,20 @@ public class CustomerOrder {
 		this.orderDetails = orderDetails;
 	}
 
+	/**
+	 * @return the orderStatusId
+	 */
+	public OrderStatusDTO getOrderStatus() {
+		return orderStatus;
+	}
+
+	/**
+	 * @param orderStatusId
+	 *            the orderStatusId to set
+	 */
+	public void setOrderStatus(OrderStatusDTO orderStatus) {
+		this.orderStatus = orderStatus;
+	}
 
 	/**
 	 * @return the listOrderItem

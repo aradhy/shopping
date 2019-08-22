@@ -12,6 +12,7 @@ import shop.daoservice.CustomerDaoService;
 import shop.dto.Response;
 import shop.model.CustomerOrder;
 import shop.model.OrderStatus;
+import shop.model.OrderStatusDTO;
 import shop.service.CustomerOrderService;
 
 @RestController
@@ -26,8 +27,8 @@ public class CustomerOrderController {
 	@RequestMapping(value="/order", method = RequestMethod.POST)
 	public ResponseEntity<Response<Object>> createOrder(@RequestBody CustomerOrder customOrder)
 	{
-		
-		customOrder.setOrderStatusId(OrderStatus.OrderStatus1.getId());
+		OrderStatusDTO orderstatus=new OrderStatusDTO();
+		orderstatus.setOrderStatus(OrderStatus.OrderStatus1.getId());
 		customerOrderService.createCustomerOrder(customOrder);
 		return Response.CREATED();
 	}

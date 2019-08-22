@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -13,20 +12,18 @@ public class OrderStatusDTO {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private Integer id;
 	private String status;
-	@OneToOne(mappedBy = "orderStatus")
-    private CustomerOrder customerOrder;
 	/**
 	 * @return the id
 	 */
-	public Long getId() {
+	public Integer getId() {
 		return id;
 	}
 	/**
 	 * @param id the id to set
 	 */
-	public void setId(Long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	/**
@@ -40,6 +37,10 @@ public class OrderStatusDTO {
 	 */
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public void setOrderStatus(Integer id) {
+		this.id=id;
+		
 	}
 
 }
