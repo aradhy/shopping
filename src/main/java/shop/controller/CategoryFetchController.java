@@ -1,9 +1,6 @@
 package shop.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import shop.dto.CategoryDTO;
-import shop.dto.SubCategoryDTO;
 import shop.model.Category;
 import shop.model.SubCategory;
 import shop.service.FetchCategoryService;
