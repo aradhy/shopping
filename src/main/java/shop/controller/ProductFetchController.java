@@ -23,7 +23,6 @@ import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
 import shop.model.FilterMetaData;
 import shop.model.Product;
-import shop.model.ProductFilterData;
 import shop.service.FetchProductService;
 import shop.service.FetchSubCategoryService;
 import shop.util.FilterParamParser;
@@ -64,7 +63,7 @@ public class ProductFetchController {
 
 	@RequestMapping("/product-name")
 	public List<Product> getProductName(@RequestParam("productName") String productName) throws InterruptedException {
-		Thread.sleep(500);
+	
 		List<Product> productList = fetchProductService.getProductByName(replaceWithPattern(productName, " "));
 
 		return productList;
@@ -108,7 +107,7 @@ public class ProductFetchController {
 			@RequestParam(value = "subId", required = false) String subId,
 			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
 			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
-			@RequestParam(value = "brandFilters", required = false) List<String> brandFilters) {
+			@RequestParam(value = "brandFilters", required = false) Set<String> brandFilters) {
 
 		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
 		return fetchProductService.getProductBasedOnFilter(catId, subId, filterMetaData);
@@ -116,11 +115,11 @@ public class ProductFetchController {
 	}
 
 	@RequestMapping(value = "/filterIntervals/cat/{catId}", method = RequestMethod.GET)
-	public ProductFilterData WeightBasedOnFilters(@PathVariable String catId,
+	public FilterMetaData WeightBasedOnFilters(@PathVariable String catId,
 			@RequestParam(value = "subId", required = false) String subId,
 			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
 			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
-			@RequestParam(value = "brandFilters", required = false) List<String> brandFilters) {
+			@RequestParam(value = "brandFilters", required = false) Set<String> brandFilters) {
 
 		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
 		return fetchProductService.getFiltersBasedOnCategoryAndSubCategoryId(catId,

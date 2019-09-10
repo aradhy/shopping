@@ -22,8 +22,8 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 	@Query(value="select prod from Product prod  join  ProductAvail prod_avail on prod.code=prod_avail.productId where prod.subId=:subCategoryId")
 	List<Product> findBySubId(@Param("subCategoryId") String subCategoryId);
 	
-	@Query(value="select prod from shop.model.Product prod join shop.model.SubCategory sub  on prod.subId=sub.id join shop.model.Category cat on sub.categoryId=cat.id join shop.model.ProductAvail prodAvail on prod.code=prodAvail.productId where (soundex(prod.brand)=soundex(:productName) or :productName like  CONCAT('%', prod.brand,'%')) or (soundex(prod.name)=soundex(:productName) or :productName like  CONCAT('%', prod.name,'%')) or (soundex(sub.name)=soundex( :productName)\r\n" + 
-			" or :productName like  CONCAT('%', sub.name,'%')) or (soundex(cat.name)=soundex(:productName) or :productName like  CONCAT('%',  cat.name,'%') )  ORDER BY \r\n" + 
+	@Query(value="select prod from shop.model.Product prod join shop.model.SubCategory sub  on prod.subId=sub.id join shop.model.Category cat on sub.categoryId=cat.id join shop.model.ProductAvail prodAvail on prod.code=prodAvail.productId where (soundex(prod.brand)=soundex(:productName) or  prod.brand like  CONCAT('%', :productName,'%')) or (soundex(prod.name)=soundex(:productName) or prod.name like  CONCAT('%', :productName,'%')) or (soundex(sub.name)=soundex( :productName)\r\n" + 
+			" or sub.name like  CONCAT('%', :productName,'%')) or (soundex(cat.name)=soundex(:productName) or cat.name like  CONCAT('%',  :productName,'%') )  ORDER BY \r\n" + 
 			"    (CASE\r\n" + 
 			"        WHEN (locate(prod.brand,:productName)>0 and locate(prod.name,:productName)<0)THEN prod.name\r\n" + 
 			"  WHEN (locate(prod.brand,:productName)>0 and locate(prod.name,:productName)>0)THEN 1 "

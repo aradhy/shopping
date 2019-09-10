@@ -2,7 +2,7 @@ package shop.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class ProductDataModel {
+public class FilterDataModel {
 	@JsonIgnore
 	private Integer weight;
 	@JsonIgnore
@@ -10,13 +10,35 @@ public class ProductDataModel {
 	private Product product;
 	@JsonIgnore
 	private Double price;
+	private String brand;
 	
-	public ProductDataModel(Product product,Integer weight, String weightUnit,Double price ) {
+	/**
+	 * @return the brand
+	 */
+	public String getBrand() {
+		return brand;
+	}
+
+	/**
+	 * @param brand the brand to set
+	 */
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+
+	/**
+	 * @param product the product to set
+	 */
+	public void setProduct(Product product) {
+		this.product = product;
+	}
+
+	public FilterDataModel(String brand,Integer weight, String weightUnit,Double price ) {
 		super();
 		this.weight = weight;
 		this.price=price;
 		this.weightUnit = weightUnit;
-		this.product = product;
+		this.brand = brand;
 	}
 
 	/**

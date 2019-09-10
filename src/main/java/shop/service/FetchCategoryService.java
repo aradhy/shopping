@@ -1,7 +1,6 @@
 package shop.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import shop.dto.CategoryDTO;
 import shop.model.Category;

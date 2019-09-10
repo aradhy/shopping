@@ -11,7 +11,7 @@ import shop.model.WeightFilterMetaData;
 public class FilterParamParser {
 
 	public static FilterMetaData parse(List<String> weightFilters, List<String> priceFilters,
-			List<String> brandFilters) {
+			Set<String> brandFilters) {
 		if (weightFilters!=null && priceFilters!=null && priceFilters!=null &&   weightFilters.isEmpty() && priceFilters.isEmpty()) {
 			return null;
 		}
