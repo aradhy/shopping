@@ -13,7 +13,10 @@ public class FilterMetaData {
 	
 	private Set<PriceFilterMetaData> priceFilters = new HashSet<PriceFilterMetaData>();
 	private List<WeightFilterMetaData> weightFilters = new ArrayList<WeightFilterMetaData>();
-	private Set<String> brandFilters = new HashSet<String>();
+	private Set<BrandFilterMetaData> brandFilters = new HashSet<BrandFilterMetaData>();
+
+
+
 
 	/**
 	 * @return the priceFilters
@@ -23,19 +26,22 @@ public class FilterMetaData {
 	}
 
 
+	
+
+
 	/**
 	 * @return the brandFilters
 	 */
-	public Set<String> getBrandFilters() {
+	public Set<BrandFilterMetaData> getBrandFilters() {
 		return brandFilters;
 	}
 
 
 	/**
-	 * @param brandFilters the brandFilters to set
+	 * @param brandFilters2 the brandFilters to set
 	 */
-	public void setBrandFilters(Set<String> brandFilters) {
-		this.brandFilters = brandFilters;
+	public void setBrandFilters(Set<BrandFilterMetaData> brandFilters2) {
+		this.brandFilters = brandFilters2;
 	}
 
 

@@ -126,8 +126,6 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		}
 		if(isNotNullOrEmpty(subCategoryId))
 			subCatQuery = cb.createQuery(SubCategory.class);
-		/*Join<SubCategory,Category> subCategoryjoin = catRoot.join("subCategory");
-		catQuery.multiselect(catRoot.get("id"),catRoot.get("name"),subCategoryjoin.get("id"),subCategoryjoin.get("name"));*/
 		List<Predicate> criteria = new ArrayList<Predicate>();
 		if(isNotNullOrEmpty(subCategoryId))
 		criteria.add(cb.equal(catRoot.get("id"),categoryId));
@@ -149,7 +147,7 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 
 	@Override
 	public CategoryDTO findCategorySubCategoryNames(String catId) {
-		 daoCategoryService.findById(catId);
+		// daoCategoryService.findById(catId);
 		 Optional<Category> categoryOpt = daoCategoryService.findById(catId);
 			Category category=	categoryOpt.get();
 			return convertToDTOCategory(category,false);

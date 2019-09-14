@@ -2,8 +2,6 @@ package shop.util;
 
 public class Range {
 
-	/*RANGE1(10, 50), RANGE2(51, 100), RANGE3(101, 150), RANGE4(151, 200), RANGE5(201, 250), RANGE6(251, 500),
-	RANGE7(501, 1000);*/
 	private  Integer max;
 	private  Integer min;
 	

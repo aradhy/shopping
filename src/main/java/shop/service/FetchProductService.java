@@ -28,14 +28,15 @@ import org.springframework.stereotype.Service;
 
 import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
+import shop.model.BrandFilterMetaData;
 import shop.model.Category;
 import shop.model.CriteriaBuilderModel;
 import shop.model.CriteriaFilterBuilderModel;
+import shop.model.FilterDataModel;
 import shop.model.FilterMetaData;
 import shop.model.PriceFilterMetaData;
 import shop.model.Product;
 import shop.model.ProductAvail;
-import shop.model.FilterDataModel;
 import shop.model.SubCategory;
 import shop.model.WeightFilterMetaData;
 import shop.util.Range;
@@ -132,7 +133,8 @@ public class FetchProductService {
 				.map(priceFilter -> handlePriceFilter(priceFilter, prodAvail, cb)).reduce((p1, p2) -> cb.or(p1, p2));
 
 		Optional<Predicate> optPredicateBrand = filterMetaData.getBrandFilters().parallelStream()
-				.map(brandFilter -> handleBrandFilter(brandFilter, prodSubJoin, cb)).reduce((p1, p2) -> cb.or(p1, p2));
+				.map(brandFilter -> handleBrandFilter(brandFilter.getBrandName(), prodSubJoin, cb))
+				.reduce((p1, p2) -> cb.or(p1, p2));
 
 		if (optPredicateWeight.isPresent())
 			criteria.add(optPredicateWeight.get());
@@ -315,8 +317,9 @@ public class FetchProductService {
 		Root<SubCategory> subRoot = query.from(SubCategory.class);
 		Join<SubCategory, Product> prodSubJoin = subRoot.join("productList");
 		Join<ProductAvail, Product> prodAvail = prodSubJoin.join("productAvailList");
-		
-		CriteriaFilterBuilderModel criterFilterBuilderModel = new CriteriaFilterBuilderModel(cb, query, prodSubJoin, prodAvail);
+
+		CriteriaFilterBuilderModel criterFilterBuilderModel = new CriteriaFilterBuilderModel(cb, query, prodSubJoin,
+				prodAvail);
 		criterFilterBuilderModel.setSubRoot(subRoot);
 
 		return criterFilterBuilderModel;
@@ -329,13 +332,13 @@ public class FetchProductService {
 		Root<SubCategory> subRoot = query.from(SubCategory.class);
 		Join<SubCategory, Product> prodSubJoin = subRoot.join("productList");
 		Join<ProductAvail, Product> prodAvail = prodSubJoin.join("productAvailList");
-		
+
 		CriteriaBuilderModel criterBuilderModel = new CriteriaBuilderModel(cb, query, prodSubJoin, prodAvail);
 		criterBuilderModel.setSubRoot(subRoot);
 
 		return criterBuilderModel;
 	}
-	
+
 	public List<Product> getCategoryById(String catId) {
 		CriteriaBuilderModel criterBuilderModel = getQueryBuilder();
 		List<Predicate> criteria = new ArrayList<Predicate>();
@@ -344,7 +347,7 @@ public class FetchProductService {
 		criteria.add(cb.equal(subRoot.get("categoryId"), catId));
 		criterBuilderModel.getQuery().where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 		return em.createQuery(criterBuilderModel.getQuery()).getResultList();
-		
+
 	}
 
 	public FilterMetaData getFiltersBasedOnCategoryAndSubCategoryId(String categoryId, String subId,
@@ -354,7 +357,8 @@ public class FetchProductService {
 		CriteriaQuery<FilterDataModel> query = cbmodel.getQuery();
 		Join<SubCategory, Product> prodSubJoin = cbmodel.getProdSubJoin();
 		Join<ProductAvail, Product> prodAvail = cbmodel.getProdAvail();
-		query.multiselect(prodSubJoin.get("brand"),prodAvail.get("weight"), prodAvail.get("weightUnit"), prodAvail.get("price"));
+		query.multiselect(prodSubJoin.get("brand"), prodAvail.get("weight"), prodAvail.get("weightUnit"),
+				prodAvail.get("price"));
 
 		List<Predicate> criteria = new ArrayList<Predicate>();
 		if (categoryId != null)
@@ -369,7 +373,8 @@ public class FetchProductService {
 				.map(priceFilter -> handlePriceFilter(priceFilter, prodAvail, cb)).reduce((p1, p2) -> cb.or(p1, p2));
 
 		Optional<Predicate> optPredicateBrand = filterMetaData.getBrandFilters().parallelStream()
-				.map(brandFilter -> handleBrandFilter(brandFilter, prodSubJoin, cb)).reduce((p1, p2) -> cb.or(p1, p2));
+				.map(brandFilter -> handleBrandFilter(brandFilter.getBrandName(), prodSubJoin, cb))
+				.reduce((p1, p2) -> cb.or(p1, p2));
 
 		if (optPredicateWeight.isPresent())
 			criteria.add(optPredicateWeight.get());
@@ -383,73 +388,97 @@ public class FetchProductService {
 		query.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 
 		List<FilterDataModel> prodList = em.createQuery(query).getResultList();
-
+		if(prodList==null || prodList.isEmpty())
+		{
+			return filterMetaData;
+		}
+		FilterMetaData filterMetaDataResponse = new FilterMetaData();
 		Map<String, Set<Integer>> map = new HashMap<>();
-		prodList.forEach(prod -> {
-			if (map.get(prod.getWeightUnit()) == null) {
-				Set<Integer> productList = new TreeSet<Integer>();
-				productList.add(prod.getWeight());
-				map.put(prod.getWeightUnit(), productList);
-			} else {
-				map.get(prod.getWeightUnit()).add(prod.getWeight());
-			}
-
-		});
-		List<WeightFilterMetaData> filterWeightIntervalList = new ArrayList<>();
-		for (Map.Entry<String, Set<Integer>> entry : map.entrySet()) {
-			Set<Integer> set = entry.getValue();
-
-			set.forEach(w -> {
-
-				if (filterWeightIntervalList.size() > 0) {
-					WeightFilterMetaData lastAdded = filterWeightIntervalList.get(filterWeightIntervalList.size() - 1);
-					OptionalInt containsValue = IntStream.rangeClosed(lastAdded.getV1(), lastAdded.getV2())
-							.filter(p -> p == w).findAny();
-					if (!containsValue.isPresent()) {
-						WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
-						createWeightFilterMetaData(weightFilterMetaData, entry, w);
-						filterWeightIntervalList.add(weightFilterMetaData);
-					} else if (containsValue.isPresent() && !(lastAdded.getU1().equals(entry.getKey()))) {
-						WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
-						createWeightFilterMetaData(weightFilterMetaData, entry, w);
-						filterWeightIntervalList.add(weightFilterMetaData);
-					}
+		
+			prodList.forEach(prod -> {
+				if (map.get(prod.getWeightUnit()) == null) {
+					Set<Integer> productList = new TreeSet<Integer>();
+					productList.add(prod.getWeight());
+					map.put(prod.getWeightUnit(), productList);
 				} else {
-					WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
-					createWeightFilterMetaData(weightFilterMetaData, entry, w);
-					filterWeightIntervalList.add(weightFilterMetaData);
+					map.get(prod.getWeightUnit()).add(prod.getWeight());
 				}
 
+			});
+			List<WeightFilterMetaData> filterWeightIntervalList = new ArrayList<WeightFilterMetaData>();
+
+			for (Map.Entry<String, Set<Integer>> entry : map.entrySet()) {
+				Set<Integer> set = entry.getValue();
+
+				set.forEach(w -> {
+					WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
+					if (filterWeightIntervalList.size() > 0) {
+						WeightFilterMetaData lastAdded = filterWeightIntervalList
+								.get(filterWeightIntervalList.size() - 1);
+						OptionalInt containsValue = IntStream.rangeClosed(lastAdded.getV1(), lastAdded.getV2())
+								.filter(p -> p == w).findAny();
+						if (!containsValue.isPresent()) {
+							
+							createWeightFilterMetaData(weightFilterMetaData, entry, w,filterMetaData);
+							filterWeightIntervalList.add(weightFilterMetaData);
+						} else if (containsValue.isPresent() && !(lastAdded.getU1().equals(entry.getKey()))) {
+							
+							createWeightFilterMetaData(weightFilterMetaData, entry, w,filterMetaData);
+							filterWeightIntervalList.add(weightFilterMetaData);
+						}
+					} else {
+						
+						createWeightFilterMetaData(weightFilterMetaData, entry, w,filterMetaData);
+						filterWeightIntervalList.add(weightFilterMetaData);
+					}
+
+				}
+
+				);
+
 			}
+			filterMetaDataResponse.setWeightFilters(filterWeightIntervalList);
+		
+		Set<PriceFilterMetaData> filterPriceIntervalList = null;
+			filterPriceIntervalList = prodList.stream().map(prod -> fetchPriceIntervals(prod.getPrice(),filterMetaData)).sorted()
+					.collect(Collectors.toSet());
+		Set<BrandFilterMetaData> brandFilterIntervalList = null;
+			brandFilterIntervalList = prodList.stream().map(prod -> createBranFilterMetaData(prod.getBrand(),filterMetaData)).sorted()
+					.collect(Collectors.toSet());
 
-			);
-
-		}
-
-		Set<PriceFilterMetaData> filterPriceIntervalList = prodList.stream()
-				.map(prod -> fetchPriceIntervals(prod.getPrice())).sorted().collect(Collectors.toSet());
-		Set<String> brandFilterIntervalList = prodList.stream()
-				.map(prod -> prod.getBrand()).sorted().collect(Collectors.toSet());
-		filterMetaData = new FilterMetaData();
-		filterMetaData.setPriceFilters(filterPriceIntervalList);
-		filterMetaData.setWeightFilters(filterWeightIntervalList);
-		filterMetaData.setBrandFilters(brandFilterIntervalList);
-		return filterMetaData;
+		filterMetaDataResponse.setPriceFilters(filterPriceIntervalList);
+		filterMetaDataResponse.setBrandFilters(brandFilterIntervalList);
+		return filterMetaDataResponse;
 	}
 
-	public PriceFilterMetaData fetchPriceIntervals(Double price) {
+	BrandFilterMetaData createBranFilterMetaData(String brand,FilterMetaData filterMetaData) {
+		BrandFilterMetaData brandFilterMetaData = new BrandFilterMetaData();
+		brandFilterMetaData.setBrandName(brand);
+		if(filterMetaData.getBrandFilters().contains(brandFilterMetaData))
+		{
+			brandFilterMetaData.setFlag(true);
+		}
+		return brandFilterMetaData;
+	}
 
+	public PriceFilterMetaData fetchPriceIntervals(Double price,FilterMetaData filterMetaData) {
 		PriceFilterMetaData priceFilterMetaData = new PriceFilterMetaData();
 		Range range = getSmallerEndRange(price.intValue());
 		priceFilterMetaData.setV1(range.getMin());
 		priceFilterMetaData.setV2(range.getMax());
+		priceFilterMetaData.setFilterCriteria("-");
+		if(filterMetaData.getPriceFilters().contains(priceFilterMetaData))
+		{
+			priceFilterMetaData.setFlag(true);
+		}
 		return priceFilterMetaData;
 
 	}
 
 	void createWeightFilterMetaData(WeightFilterMetaData weightFilterMetaData, Map.Entry<String, Set<Integer>> entry,
-			Integer w) {
+			Integer w,FilterMetaData filterMetaData) {
 
+		Set<WeightFilterMetaData> setWeightFilter=new HashSet<WeightFilterMetaData>(filterMetaData.getWeightFilters());
 		weightFilterMetaData.setV1(w);
 		weightFilterMetaData.setU1(entry.getKey());
 		if (entry.getKey().equals("kg") || entry.getKey().equals("litre")) {
@@ -463,6 +492,12 @@ public class FetchProductService {
 
 		}
 		weightFilterMetaData.setU2(entry.getKey());
+		weightFilterMetaData.setFilterCriteria("-");
+		if(setWeightFilter.contains(weightFilterMetaData))
+		{
+			weightFilterMetaData.setFlag(true);
+		}
+		
 	}
 
 	Range getSmallerEndRange(int weight) {

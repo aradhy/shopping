@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import shop.model.BrandFilterMetaData;
 import shop.model.FilterMetaData;
 import shop.model.PriceFilterMetaData;
 import shop.model.WeightFilterMetaData;
@@ -12,12 +13,13 @@ public class FilterParamParser {
 
 	public static FilterMetaData parse(List<String> weightFilters, List<String> priceFilters,
 			Set<String> brandFilters) {
-		if (weightFilters!=null && priceFilters!=null && priceFilters!=null &&   weightFilters.isEmpty() && priceFilters.isEmpty()) {
-			return null;
+		FilterMetaData filterMetaData = new FilterMetaData();
+		if ((weightFilters == null || weightFilters.isEmpty()) && (priceFilters == null || priceFilters.isEmpty())
+				&& (brandFilters == null || brandFilters.isEmpty())) {
+			return filterMetaData;
 		}
 
-		FilterMetaData filterMetaData = new FilterMetaData();
-		if (weightFilters != null) {
+		if (weightFilters != null && weightFilters.size() > 0) {
 
 			List<WeightFilterMetaData> listWeightRangeFilterMetaData = weightFilters.parallelStream()
 					.map(weightFilterString -> createWeightFilterMetaData(weightFilterString))
@@ -25,18 +27,28 @@ public class FilterParamParser {
 			filterMetaData.setWeightFilters(listWeightRangeFilterMetaData);
 
 		}
-		if (priceFilters != null) {
+		if (priceFilters != null && priceFilters.size() > 0) {
 			Set<PriceFilterMetaData> listPriceFilterMetaData = priceFilters.parallelStream()
 					.map(weightFilterString -> createPriceFilterMetaData(weightFilterString))
 					.collect(Collectors.toSet());
 			filterMetaData.setPriceFilters(listPriceFilterMetaData);
 
 		}
-		if (brandFilters != null) {
-			filterMetaData.setBrandFilters(brandFilters);
+		if (brandFilters != null && brandFilters.size() > 0) {
+
+			Set<BrandFilterMetaData> brandFilterMetaDataSet = brandFilters.parallelStream()
+					.map(brandName -> createBranFilterMetaData(brandName)).collect(Collectors.toSet());
+			filterMetaData.setBrandFilters(brandFilterMetaDataSet);
 		}
 		return filterMetaData;
 
+	}
+
+	static BrandFilterMetaData createBranFilterMetaData(String brand) {
+		BrandFilterMetaData brandFilterMetaData = new BrandFilterMetaData();
+		brandFilterMetaData.setBrandName(brand);
+		brandFilterMetaData.setFlag(true);
+		return brandFilterMetaData;
 	}
 
 	static WeightFilterMetaData createWeightFilterMetaData(String weightFilterString) {
@@ -77,6 +89,7 @@ public class FilterParamParser {
 		PriceFilterMetaData priceFilterMetaData = new PriceFilterMetaData();
 		priceFilterMetaData.setV1(Integer.parseInt(priceFilterString.substring(1, priceFilterString.length())));
 		priceFilterMetaData.setFilterCriteria("lt");
+		priceFilterMetaData.setFlag(true);
 		return priceFilterMetaData;
 	}
 
@@ -84,6 +97,7 @@ public class FilterParamParser {
 		PriceFilterMetaData priceFilterMetaData = new PriceFilterMetaData();
 		priceFilterMetaData.setV1(Integer.parseInt(weightFilterString.substring(1, weightFilterString.length())));
 		priceFilterMetaData.setFilterCriteria("gt");
+		priceFilterMetaData.setFlag(true);
 		return priceFilterMetaData;
 	}
 
@@ -91,6 +105,7 @@ public class FilterParamParser {
 		WeightFilterMetaData weightFilterMetaData = createWeightDefaultCaseFilterMetaData(
 				weightFilterString.substring(1, weightFilterString.length()));
 		weightFilterMetaData.setFilterCriteria("lt");
+		weightFilterMetaData.setFlag(true);
 		return weightFilterMetaData;
 
 	}
@@ -99,6 +114,7 @@ public class FilterParamParser {
 		WeightFilterMetaData weightFilterMetaData = createWeightDefaultCaseFilterMetaData(
 				weightFilterString.substring(1, weightFilterString.length()));
 		weightFilterMetaData.setFilterCriteria("gt");
+		weightFilterMetaData.setFlag(true);
 		return weightFilterMetaData;
 
 	}
@@ -107,6 +123,7 @@ public class FilterParamParser {
 		WeightFilterMetaData weightFilterMetaData = parseWeightFilterMetaData(weightFilterString);
 		if (weightFilterMetaData.getFilterCriteria() == null)
 			weightFilterMetaData.setFilterCriteria("eq");
+		weightFilterMetaData.setFlag(true);
 		return weightFilterMetaData;
 	}
 
@@ -114,6 +131,7 @@ public class FilterParamParser {
 		PriceFilterMetaData priceFilterMetaData = parsePriceFilterMetaData(weightFilterString);
 		if (priceFilterMetaData.getFilterCriteria() == null)
 			priceFilterMetaData.setFilterCriteria("eq");
+		priceFilterMetaData.setFlag(true);
 		return priceFilterMetaData;
 	}
 
@@ -127,7 +145,7 @@ public class FilterParamParser {
 			weightFilterMetaData.setU2(weightFilterArray[3]);
 			weightFilterMetaData.setFilterCriteria("bw");
 		}
-
+		weightFilterMetaData.setFlag(true);
 		return weightFilterMetaData;
 	}
 
@@ -139,7 +157,7 @@ public class FilterParamParser {
 			priceFilterMetaData.setV2(Integer.parseInt(priceFilterArray[1]));
 			priceFilterMetaData.setFilterCriteria("bw");
 		}
-
+		priceFilterMetaData.setFlag(true);
 		return priceFilterMetaData;
 	}
 

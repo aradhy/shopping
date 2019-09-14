@@ -4,8 +4,8 @@ public class PriceFilterMetaData implements Comparable<PriceFilterMetaData>{
 	
 	private Integer v1;
 	private Integer v2;
-	boolean priceFlag=false;
 	private String filterCriteria;
+	boolean flag;
 	
 	/**
 	 * @return the filterCriteria
@@ -14,23 +14,24 @@ public class PriceFilterMetaData implements Comparable<PriceFilterMetaData>{
 		return filterCriteria;
 	}
 	/**
+	 * @return the flag
+	 */
+	public boolean isFlag() {
+		return flag;
+	}
+	/**
+	 * @param flag the flag to set
+	 */
+	public void setFlag(boolean flag) {
+		this.flag = flag;
+	}
+	/**
 	 * @param filterCriteria the filterCriteria to set
 	 */
 	public void setFilterCriteria(String filterCriteria) {
 		this.filterCriteria = filterCriteria;
 	}
-	/**
-	 * @return the priceFlag
-	 */
-	public boolean isPriceFlag() {
-		return priceFlag;
-	}
-	/**
-	 * @param priceFlag the priceFlag to set
-	 */
-	public void setPriceFlag(boolean priceFlag) {
-		this.priceFlag = priceFlag;
-	}
+	
 	/**
 	 * @return the v1
 	 */
@@ -61,7 +62,7 @@ public class PriceFilterMetaData implements Comparable<PriceFilterMetaData>{
 	{
 		
 		PriceFilterMetaData price=(PriceFilterMetaData) obj;
-		if(this.v2==null)
+		if(this.v1==null || this.v2==null)
 		{
 			return false;
 		}
@@ -81,5 +82,6 @@ public class PriceFilterMetaData implements Comparable<PriceFilterMetaData>{
 	       return this.getV1()-priceFilterMetaData.getV1();
 
 	    }
+	
 
 }
