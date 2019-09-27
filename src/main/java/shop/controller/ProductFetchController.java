@@ -132,4 +132,11 @@ public class ProductFetchController {
 		Matcher mtch = ptn.matcher(str);
 		return mtch.replaceAll(replace);
 	}
+	
+	@RequestMapping("/product/{productCode}")
+	public Product getProduct(@PathVariable("productCode") String productCode) throws ParseException {
+		Product product = fetchProductService.findByProductCode(productCode);
+
+		return product;
+	}
 }

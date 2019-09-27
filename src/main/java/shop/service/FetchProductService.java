@@ -57,6 +57,13 @@ public class FetchProductService {
 		return prodDto;
 
 	}
+	
+	
+	public Product findByProductCode(String productCode) throws ParseException {
+		Optional<Product> prod = daoProductService.findById(productCode);
+		return prod.get();
+
+	}
 
 	public Product createProduct(Product prod) throws ParseException {
 		return daoProductService.save(prod);
@@ -103,7 +110,9 @@ public class FetchProductService {
 	}
 
 	public List<ProductDTO> getProduct(List<String> productAvailList) {
-		List<ProductDTO> prodList = daoProductService.findAllByProductAvail(productAvailList);
+		List<ProductDTO> prodList=new ArrayList<>();
+		if(productAvailList.size()>0)
+		 prodList = daoProductService.findAllByProductAvail(productAvailList);
 		return prodList;
 
 	}
