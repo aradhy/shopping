@@ -7,10 +7,20 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class SubCategoryDTO {
 	
 	
+	
 	private String id;
 	private String name;
 	private String imageId;
+	public SubCategoryDTO() {
+		super();
+	}
 	private String imageLink;
+	
+	public SubCategoryDTO(String id, String name) {
+		super();
+		this.id = id;
+		this.name = name;
+	}
 	
 	public String getName() {
 		return name;

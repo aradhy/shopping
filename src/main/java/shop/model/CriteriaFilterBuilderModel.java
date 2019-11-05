@@ -8,18 +8,44 @@ import javax.persistence.criteria.Root;
 public class CriteriaFilterBuilderModel {
 
 	Root<SubCategory> subRoot;
+	Root<Category> catRoot;
+	/**
+	 * @return the catRoot
+	 */
+	public Root<Category> getCatRoot() {
+		return catRoot;
+	}
+	/**
+	 * @param catRoot the catRoot to set
+	 */
+	public void setCatRoot(Root<Category> catRoot) {
+		this.catRoot = catRoot;
+	}
 	Join<SubCategory, Product> prodSubJoin;
 	Join<ProductAvail, Product> prodAvail;
+	Join<Category, SubCategory> catSubJoin;
 	CriteriaBuilder cb;
 
 	CriteriaQuery<FilterDataModel> query;
 	public CriteriaFilterBuilderModel(CriteriaBuilder cb, CriteriaQuery<FilterDataModel> query,
-			Join<SubCategory, Product> prodSubJoin, Join<ProductAvail, Product> prodAvail) {
+			Join<SubCategory, Product> prodSubJoin, Join<ProductAvail, Product> prodAvail,Join<Category, SubCategory> catSubJoin) {
 		this.cb=cb;
 		this.query=query;
 		this.prodSubJoin=prodSubJoin;
 		this.prodAvail=prodAvail;
-		
+		this.catSubJoin=catSubJoin;
+	}
+	/**
+	 * @return the catSubJoin
+	 */
+	public Join<Category, SubCategory> getCatSubJoin() {
+		return catSubJoin;
+	}
+	/**
+	 * @param catSubJoin the catSubJoin to set
+	 */
+	public void setCatSubJoin(Join<Category, SubCategory> catSubJoin) {
+		this.catSubJoin = catSubJoin;
 	}
 	/**
 	 * @return the cb

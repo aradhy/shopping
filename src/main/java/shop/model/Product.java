@@ -1,6 +1,7 @@
 package shop.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -37,7 +38,7 @@ public class Product {
 	@OneToMany(fetch = FetchType.LAZY, targetEntity = ProductAvail.class, cascade = CascadeType.ALL, mappedBy = "productId")
 	@Basic(fetch = FetchType.LAZY)
 	@LazyCollection(LazyCollectionOption.TRUE)
-	private List<ProductAvail> productAvailList;
+	private List<ProductAvail> productAvailList=new ArrayList<>();
 	@Transient
 	@JsonIgnore
 	private Integer weight;

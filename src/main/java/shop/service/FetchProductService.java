@@ -12,9 +12,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
@@ -26,6 +26,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static shop.constant.Constants.*;
 import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
 import shop.model.BrandFilterMetaData;
@@ -37,6 +38,8 @@ import shop.model.FilterMetaData;
 import shop.model.PriceFilterMetaData;
 import shop.model.Product;
 import shop.model.ProductAvail;
+import shop.model.ProductFilter;
+import shop.model.SearchProduct;
 import shop.model.SubCategory;
 import shop.model.WeightFilterMetaData;
 import shop.util.Range;
@@ -57,8 +60,7 @@ public class FetchProductService {
 		return prodDto;
 
 	}
-	
-	
+
 	public Product findByProductCode(String productCode) throws ParseException {
 		Optional<Product> prod = daoProductService.findById(productCode);
 		return prod.get();
@@ -76,8 +78,58 @@ public class FetchProductService {
 
 	}
 
-	public List<Product> getProductByName(String productName) {
-		List<Product> prodList = daoProductService.findByProductName(productName);
+	public List<ProductFilter> getProductByName(String productName) {
+		List<ProductFilter> prodList = daoProductService.findByProductName(productName);
+		return prodList;
+
+	}
+	
+	public List<SearchProduct> getProductBasedOnFilter(String productName, FilterMetaData filterMetaData) {
+		String queryString = "select new shop.model.SearchProduct(cat.id,prod) from Product prod join SubCategory sub  on prod.subId=sub.id join Category cat on sub.categoryId=cat.id join ProductAvail prodAvail on prod.code=prodAvail.productId where (((soundex(prod.brand)=soundex(:productName) and  prod.brand like concat('%', SUBSTRING(:productName,1,2), '%') ) or  prod.brand like  CONCAT('%', :productName,'%')) or ((soundex(prod.name)=soundex(:productName) and  prod.name like concat('%', SUBSTRING(:productName,1,2), '%') ) or prod.name like  CONCAT('%', :productName,'%')) or ((soundex(sub.name)=soundex( :productName) and sub.name like concat('%', SUBSTRING(:productName,1,2), '%')) \r\n"
+				+ "or sub.name like  CONCAT('%', :productName,'%')) or ((soundex(cat.name)=soundex(:productName) and  cat.name like concat('%', SUBSTRING(:productName,1,2), '%')) or cat.name like  CONCAT('%',  :productName,'%') ) ) ";
+		String weightFilterMetadataString = "";
+		int weightCount = 0;
+		for (WeightFilterMetaData weightFilterMetadata : filterMetaData.getWeightFilters()) {
+			weightFilterMetadataString = weightFilterMetadataString + LEFT_PARANTHESIS
+					+ handleSearchWeightFilter(weightFilterMetadata) + RIGHT_PARANTHESIS;
+			weightCount++;
+			if (weightCount < filterMetaData.getWeightFilters().size()) {
+				weightFilterMetadataString = weightFilterMetadataString + OR;
+			}
+		}
+		if (weightFilterMetadataString.length() > 0)
+			queryString = queryString + AND + LEFT_PARANTHESIS + weightFilterMetadataString + RIGHT_PARANTHESIS;
+
+		String brandFilterMetadataString = "";
+		int countBrand = 0;
+		for (BrandFilterMetaData brandFilterMetadata : filterMetaData.getBrandFilters()) {
+			brandFilterMetadataString = brandFilterMetadataString + LEFT_PARANTHESIS + handleBrand(brandFilterMetadata)
+					+ RIGHT_PARANTHESIS;
+			countBrand++;
+			if (countBrand < filterMetaData.getBrandFilters().size()) {
+				brandFilterMetadataString = brandFilterMetadataString + OR;
+			}
+		}
+
+		if (brandFilterMetadataString.length() > 0)
+			queryString = queryString + AND + LEFT_PARANTHESIS + brandFilterMetadataString + RIGHT_PARANTHESIS;
+
+		int countPrice = 0;
+		String priceFilterMetadataString = "";
+		for (PriceFilterMetaData priceFilterMetadata : filterMetaData.getPriceFilters()) {
+			priceFilterMetadataString = priceFilterMetadataString + LEFT_PARANTHESIS
+					+ handleSearchPriceFilter(priceFilterMetadata) + RIGHT_PARANTHESIS;
+			countPrice++;
+			if (countPrice < filterMetaData.getPriceFilters().size()) {
+				priceFilterMetadataString = priceFilterMetadataString + OR;
+			}
+		}
+
+		if (priceFilterMetadataString.length() > 0)
+			queryString = queryString + AND + LEFT_PARANTHESIS + priceFilterMetadataString + RIGHT_PARANTHESIS;
+		TypedQuery<SearchProduct> query = em.createQuery(queryString,SearchProduct.class);
+		query.setParameter("productName", productName);
+		List<SearchProduct> prodList = query.getResultList();
 		return prodList;
 
 	}
@@ -110,9 +162,9 @@ public class FetchProductService {
 	}
 
 	public List<ProductDTO> getProduct(List<String> productAvailList) {
-		List<ProductDTO> prodList=new ArrayList<>();
-		if(productAvailList.size()>0)
-		 prodList = daoProductService.findAllByProductAvail(productAvailList);
+		List<ProductDTO> prodList = new ArrayList<>();
+		if (productAvailList.size() > 0)
+			prodList = daoProductService.findAllByProductAvail(productAvailList);
 		return prodList;
 
 	}
@@ -121,14 +173,14 @@ public class FetchProductService {
 		return daoProductService.findProductByCategory(categoryId);
 	}
 
-	public List<Product> getProductBasedOnFilter(String catId, String subId, FilterMetaData filterMetaData) {
+	public List<SearchProduct> getProductBasedOnFilter(String catId, String subId, FilterMetaData filterMetaData) {
 
 		CriteriaBuilderModel cbmodel = getQueryBuilder();
 		CriteriaBuilder cb = cbmodel.getCb();
-		CriteriaQuery<Product> query = cbmodel.getQuery();
+		CriteriaQuery<SearchProduct> query = cbmodel.getQuery();
 		Join<SubCategory, Product> prodSubJoin = cbmodel.getProdSubJoin();
 		Join<ProductAvail, Product> prodAvail = cbmodel.getProdAvail();
-		query.select(prodSubJoin);
+		query.multiselect(cbmodel.getSubRoot().get("categoryId"),prodSubJoin);
 		List<Predicate> criteria = new ArrayList<Predicate>();
 		if (catId != null)
 			criteria.add(cb.equal(cbmodel.getSubRoot().get("categoryId"), catId));
@@ -152,13 +204,14 @@ public class FetchProductService {
 		if (optPredicateBrand.isPresent())
 			criteria.add(optPredicateBrand.get());
 
-		Order order1 = cb.desc(prodAvail.get("price"));
+		Order order1 = cb.desc(prodAvail.get(PRICE));
 		Order order2 = cb.desc(prodSubJoin.get("name"));
-		Order order3 = cb.desc(prodSubJoin.get("brand"));
+		Order order3 = cb.desc(prodSubJoin.get(BRAND));
 		query = query.orderBy(order1, order2, order3);
 		query.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 
-		List<Product> listPod = em.createQuery(query).getResultList();
+		List<SearchProduct> listPod = em.createQuery(query).getResultList();
+		
 		return listPod;
 	}
 
@@ -184,23 +237,23 @@ public class FetchProductService {
 
 	private Predicate equalToPriceFilter(Integer value, Join<ProductAvail, Product> prodAvail, CriteriaBuilder cb) {
 
-		Predicate predicate = cb.equal(prodAvail.get("price"), value);
+		Predicate predicate = cb.equal(prodAvail.get(PRICE), value);
 		return predicate;
 	}
 
 	private Predicate greaterThanPriceFilter(Integer value, Join<ProductAvail, Product> prodAvail, CriteriaBuilder cb) {
-		Predicate predicate = cb.greaterThan(prodAvail.get("price"), value);
+		Predicate predicate = cb.greaterThan(prodAvail.get(PRICE), value);
 		return predicate;
 	}
 
 	private Predicate lessThanPriceFilter(Integer value, Join<ProductAvail, Product> prodAvail, CriteriaBuilder cb) {
-		Predicate predicate = cb.lessThan(prodAvail.get("price"), value);
+		Predicate predicate = cb.lessThan(prodAvail.get(PRICE), value);
 		return predicate;
 	}
 
 	private Predicate betweenCasePriceFilter(Integer v1, Integer v2, Join<ProductAvail, Product> prodAvail,
 			CriteriaBuilder cb) {
-		Predicate predicate = cb.between(prodAvail.get("price"), v1, v2);
+		Predicate predicate = cb.between(prodAvail.get(PRICE), v1, v2);
 		return predicate;
 	}
 
@@ -228,8 +281,8 @@ public class FetchProductService {
 
 	private Predicate equalToWeightFilter(WeightFilterMetaData weightFilterMetaData,
 			Join<ProductAvail, Product> prodAvail, CriteriaBuilder cb) {
-		Predicate predicateStartWeightUnit = cb.equal(prodAvail.get("weightUnit"), weightFilterMetaData.getU1());
-		Predicate predicateStartWeight = cb.equal(prodAvail.get("weight"), weightFilterMetaData.getV1());
+		Predicate predicateStartWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), weightFilterMetaData.getU1());
+		Predicate predicateStartWeight = cb.equal(prodAvail.get(WEIGHT), weightFilterMetaData.getV1());
 		Predicate finalWeightCriteria = cb.and(predicateStartWeightUnit, predicateStartWeight);
 		return finalWeightCriteria;
 	}
@@ -248,17 +301,17 @@ public class FetchProductService {
 		String u1 = weightFilterMetaData.getU1();
 		String u2 = weightFilterMetaData.getU2();
 		if (weightFilterMetaData.getU1().equals(weightFilterMetaData.getU2())) {
-			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get("weightUnit"), weightFilterMetaData.getU1());
-			Predicate predicateStartWeight = cb.between(prodAvail.get("weight"),
+			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), weightFilterMetaData.getU1());
+			Predicate predicateStartWeight = cb.between(prodAvail.get(WEIGHT),
 					Integer.valueOf(weightFilterMetaData.getV1()), Integer.valueOf(weightFilterMetaData.getV2()));
 			finalWeightCriteria = cb.and(predicateStartWeightUnit, predicateStartWeight);
 
 		} else {
-			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get("weightUnit"), u1);
-			Predicate predicateStartWeight = cb.greaterThanOrEqualTo(prodAvail.get("weight"), v1);
+			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), u1);
+			Predicate predicateStartWeight = cb.greaterThanOrEqualTo(prodAvail.get(WEIGHT), v1);
 			Predicate predStartWeightCriteria = cb.and(predicateStartWeightUnit, predicateStartWeight);
-			Predicate predicateEndWeightUnit = cb.equal(prodAvail.get("weightUnit"), u2);
-			Predicate predicateEndWeight = cb.lessThanOrEqualTo(prodAvail.get("weight"), v2);
+			Predicate predicateEndWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), u2);
+			Predicate predicateEndWeight = cb.lessThanOrEqualTo(prodAvail.get(WEIGHT), v2);
 			Predicate predEndWeightCriteria = cb.and(predicateEndWeight, predicateEndWeightUnit);
 			finalWeightCriteria = cb.or(predStartWeightCriteria, predEndWeightCriteria);
 
@@ -269,14 +322,14 @@ public class FetchProductService {
 
 	Predicate lessThanWeightFilter(Integer v1, String u1, Join<ProductAvail, Product> prodAvail, CriteriaBuilder cb) {
 
-		Predicate predicateEndWeightUnit = cb.equal(prodAvail.get("weightUnit"), u1);
-		Predicate predicateEndWeight = cb.lessThan(prodAvail.get("weight"), v1);
+		Predicate predicateEndWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), u1);
+		Predicate predicateEndWeight = cb.lessThan(prodAvail.get(WEIGHT), v1);
 		Predicate predEndWeightCriteria = cb.and(predicateEndWeight, predicateEndWeightUnit);
 
 		String smallerWeightUnit = checkWeight(u1, "sm");
 		if (isNotNullOrEmpty(smallerWeightUnit)) {
-			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get("weightUnit"), smallerWeightUnit);
-			Predicate predicateStartWeight = cb.lessThan(prodAvail.get("weight"), 1000);
+			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), smallerWeightUnit);
+			Predicate predicateStartWeight = cb.lessThan(prodAvail.get(WEIGHT), 1000);
 
 			Predicate predStartWeightCriteria = cb.and(predicateStartWeightUnit, predicateStartWeight);
 			Predicate finalWeightCriteria = cb.or(predStartWeightCriteria, predEndWeightCriteria);
@@ -290,13 +343,13 @@ public class FetchProductService {
 			CriteriaBuilder cb) {
 		Integer v1 = weightFilterMetaData.getV1();
 		String u1 = weightFilterMetaData.getU1();
-		Predicate predicateEndWeightUnit = cb.equal(prodAvail.get("weightUnit"), u1);
-		Predicate predicateEndWeight = cb.greaterThan(prodAvail.get("weight"), v1);
+		Predicate predicateEndWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), u1);
+		Predicate predicateEndWeight = cb.greaterThan(prodAvail.get(WEIGHT), v1);
 		Predicate predEndWeightCriteria = cb.and(predicateEndWeight, predicateEndWeightUnit);
 		String greaterWeightUnit = checkWeight(u1, "gt");
 		if (isNotNullOrEmpty(greaterWeightUnit)) {
-			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get("weightUnit"), greaterWeightUnit);
-			Predicate predicateStartWeight = cb.greaterThanOrEqualTo(prodAvail.get("weight"), 1);
+			Predicate predicateStartWeightUnit = cb.equal(prodAvail.get(WEIGHT_UNIT), greaterWeightUnit);
+			Predicate predicateStartWeight = cb.greaterThanOrEqualTo(prodAvail.get(WEIGHT), 1);
 			Predicate predStartWeightCriteria = cb.and(predicateStartWeightUnit, predicateStartWeight);
 			Predicate finalWeightCriteria = cb.or(predStartWeightCriteria, predEndWeightCriteria);
 			return finalWeightCriteria;
@@ -306,7 +359,7 @@ public class FetchProductService {
 	}
 
 	Predicate handleBrandFilter(String brand, Join<SubCategory, Product> prodSubJoin, CriteriaBuilder cb) {
-		Predicate predicate = cb.equal(prodSubJoin.get("brand"), brand);
+		Predicate predicate = cb.equal(prodSubJoin.get(BRAND), brand);
 		return predicate;
 	}
 
@@ -321,15 +374,15 @@ public class FetchProductService {
 
 	public CriteriaFilterBuilderModel getFilterQueryBuilder() {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
-
 		CriteriaQuery<FilterDataModel> query = cb.createQuery(FilterDataModel.class);
-		Root<SubCategory> subRoot = query.from(SubCategory.class);
-		Join<SubCategory, Product> prodSubJoin = subRoot.join("productList");
+		Root<Category> catRoot = query.from(Category.class);
+		Join<Category, SubCategory> catSubJoin = catRoot.join("subCategory");
+		Join<SubCategory, Product> prodSubJoin = catSubJoin.join("productList");
 		Join<ProductAvail, Product> prodAvail = prodSubJoin.join("productAvailList");
 
 		CriteriaFilterBuilderModel criterFilterBuilderModel = new CriteriaFilterBuilderModel(cb, query, prodSubJoin,
-				prodAvail);
-		criterFilterBuilderModel.setSubRoot(subRoot);
+				prodAvail, catSubJoin);
+		criterFilterBuilderModel.setCatRoot(catRoot);
 
 		return criterFilterBuilderModel;
 	}
@@ -337,7 +390,7 @@ public class FetchProductService {
 	public CriteriaBuilderModel getQueryBuilder() {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
-		CriteriaQuery<Product> query = cb.createQuery(Product.class);
+		CriteriaQuery<SearchProduct> query = cb.createQuery(SearchProduct.class);
 		Root<SubCategory> subRoot = query.from(SubCategory.class);
 		Join<SubCategory, Product> prodSubJoin = subRoot.join("productList");
 		Join<ProductAvail, Product> prodAvail = prodSubJoin.join("productAvailList");
@@ -355,25 +408,28 @@ public class FetchProductService {
 		CriteriaBuilder cb = criterBuilderModel.getCb();
 		criteria.add(cb.equal(subRoot.get("categoryId"), catId));
 		criterBuilderModel.getQuery().where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
-		return em.createQuery(criterBuilderModel.getQuery()).getResultList();
-
+	//	return em.createQuery(criterBuilderModel.getQuery()).getResultList();
+return null;
 	}
 
-	public FilterMetaData getFiltersBasedOnCategoryAndSubCategoryId(String categoryId, String subId,
+	public FilterMetaData getFiltersBasedOnCategoryAndSubCategoryId(String categoryId, String subId, String search,
 			FilterMetaData filterMetaData) {
 		CriteriaFilterBuilderModel cbmodel = getFilterQueryBuilder();
 		CriteriaBuilder cb = cbmodel.getCb();
 		CriteriaQuery<FilterDataModel> query = cbmodel.getQuery();
 		Join<SubCategory, Product> prodSubJoin = cbmodel.getProdSubJoin();
 		Join<ProductAvail, Product> prodAvail = cbmodel.getProdAvail();
-		query.multiselect(prodSubJoin.get("brand"), prodAvail.get("weight"), prodAvail.get("weightUnit"),
-				prodAvail.get("price"));
+		Join<Category, SubCategory> catSubJoin = cbmodel.getCatSubJoin();
+		query.multiselect(prodSubJoin.get(BRAND), prodAvail.get(WEIGHT), prodAvail.get(WEIGHT_UNIT),
+				prodAvail.get(PRICE)).distinct(true);
 
 		List<Predicate> criteria = new ArrayList<Predicate>();
 		if (categoryId != null)
-			criteria.add(cb.equal(cbmodel.getSubRoot().get("categoryId"), categoryId));
-		if (subId != null)
+			criteria.add(cb.equal(cbmodel.getCatRoot().get("id"), categoryId));
+		if (subId!=null )
 			criteria.add(cb.equal(prodSubJoin.get("subId"), subId));
+		if (search != null)
+			criteria.add(filterMetaDataOnSearch(search, catSubJoin, prodSubJoin, cb, cbmodel));
 
 		Optional<Predicate> optPredicateWeight = filterMetaData.getWeightFilters().parallelStream()
 				.map(weightFilter -> handleWeightFilter(weightFilter, prodAvail, cb)).reduce((p1, p2) -> cb.or(p1, p2));
@@ -392,92 +448,89 @@ public class FetchProductService {
 		if (optPredicateBrand.isPresent())
 			criteria.add(optPredicateBrand.get());
 
-		Order order1 = cb.asc(prodAvail.get("weight"));
+		Order order1 = cb.asc(prodAvail.get(WEIGHT));
 		query = query.orderBy(order1);
 		query.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
 
 		List<FilterDataModel> prodList = em.createQuery(query).getResultList();
-		if(prodList==null || prodList.isEmpty())
-		{
+		if (prodList == null || prodList.isEmpty()) {
 			return filterMetaData;
 		}
 		FilterMetaData filterMetaDataResponse = new FilterMetaData();
 		Map<String, Set<Integer>> map = new HashMap<>();
-		
-			prodList.forEach(prod -> {
-				if (map.get(prod.getWeightUnit()) == null) {
-					Set<Integer> productList = new TreeSet<Integer>();
-					productList.add(prod.getWeight());
-					map.put(prod.getWeightUnit(), productList);
-				} else {
-					map.get(prod.getWeightUnit()).add(prod.getWeight());
-				}
 
-			});
-			List<WeightFilterMetaData> filterWeightIntervalList = new ArrayList<WeightFilterMetaData>();
+		prodList.forEach(prod -> {
+			if (map.get(prod.getWeightUnit()) == null) {
+				Set<Integer> productList = new TreeSet<Integer>();
+				productList.add(prod.getWeight());
+				map.put(prod.getWeightUnit(), productList);
+			} else {
+				map.get(prod.getWeightUnit()).add(prod.getWeight());
+			}
 
-			for (Map.Entry<String, Set<Integer>> entry : map.entrySet()) {
-				Set<Integer> set = entry.getValue();
+		});
+		List<WeightFilterMetaData> filterWeightIntervalList = new ArrayList<WeightFilterMetaData>();
 
-				set.forEach(w -> {
-					WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
-					if (filterWeightIntervalList.size() > 0) {
-						WeightFilterMetaData lastAdded = filterWeightIntervalList
-								.get(filterWeightIntervalList.size() - 1);
-						OptionalInt containsValue = IntStream.rangeClosed(lastAdded.getV1(), lastAdded.getV2())
-								.filter(p -> p == w).findAny();
-						if (!containsValue.isPresent()) {
-							
-							createWeightFilterMetaData(weightFilterMetaData, entry, w,filterMetaData);
-							filterWeightIntervalList.add(weightFilterMetaData);
-						} else if (containsValue.isPresent() && !(lastAdded.getU1().equals(entry.getKey()))) {
-							
-							createWeightFilterMetaData(weightFilterMetaData, entry, w,filterMetaData);
-							filterWeightIntervalList.add(weightFilterMetaData);
-						}
-					} else {
-						
-						createWeightFilterMetaData(weightFilterMetaData, entry, w,filterMetaData);
+		for (Map.Entry<String, Set<Integer>> entry : map.entrySet()) {
+			Set<Integer> set = entry.getValue();
+
+			set.forEach(w -> {
+				WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
+				if (filterWeightIntervalList.size() > 0) {
+					WeightFilterMetaData lastAdded = filterWeightIntervalList.get(filterWeightIntervalList.size() - 1);
+					OptionalInt containsValue = IntStream.rangeClosed(lastAdded.getV1(), lastAdded.getV2())
+							.filter(p -> p == w).findAny();
+					if (!containsValue.isPresent()) {
+
+						createWeightFilterMetaData(weightFilterMetaData, entry, w, filterMetaData);
+						filterWeightIntervalList.add(weightFilterMetaData);
+					} else if (containsValue.isPresent() && !(lastAdded.getU1().equals(entry.getKey()))) {
+
+						createWeightFilterMetaData(weightFilterMetaData, entry, w, filterMetaData);
 						filterWeightIntervalList.add(weightFilterMetaData);
 					}
+				} else {
 
+					createWeightFilterMetaData(weightFilterMetaData, entry, w, filterMetaData);
+					filterWeightIntervalList.add(weightFilterMetaData);
 				}
 
-				);
-
 			}
-			filterMetaDataResponse.setWeightFilters(filterWeightIntervalList);
-		
+
+			);
+
+		}
+		filterMetaDataResponse.setWeightFilters(filterWeightIntervalList);
+
 		Set<PriceFilterMetaData> filterPriceIntervalList = null;
-			filterPriceIntervalList = prodList.stream().map(prod -> fetchPriceIntervals(prod.getPrice(),filterMetaData)).sorted()
-					.collect(Collectors.toSet());
+		filterPriceIntervalList = prodList.stream().map(prod -> fetchPriceIntervals(prod.getPrice(), filterMetaData))
+				.sorted().collect(Collectors.toSet());
 		Set<BrandFilterMetaData> brandFilterIntervalList = null;
-			brandFilterIntervalList = prodList.stream().map(prod -> createBranFilterMetaData(prod.getBrand(),filterMetaData)).sorted()
-					.collect(Collectors.toSet());
+		brandFilterIntervalList = prodList.stream()
+				.map(prod -> createBranFilterMetaData(prod.getBrand(), filterMetaData)).sorted()
+				.collect(Collectors.toSet());
 
 		filterMetaDataResponse.setPriceFilters(filterPriceIntervalList);
 		filterMetaDataResponse.setBrandFilters(brandFilterIntervalList);
 		return filterMetaDataResponse;
 	}
 
-	BrandFilterMetaData createBranFilterMetaData(String brand,FilterMetaData filterMetaData) {
+	BrandFilterMetaData createBranFilterMetaData(String brand, FilterMetaData filterMetaData) {
 		BrandFilterMetaData brandFilterMetaData = new BrandFilterMetaData();
 		brandFilterMetaData.setBrandName(brand);
-		if(filterMetaData.getBrandFilters().contains(brandFilterMetaData))
-		{
+		if (filterMetaData.getBrandFilters().contains(brandFilterMetaData)) {
 			brandFilterMetaData.setFlag(true);
 		}
 		return brandFilterMetaData;
 	}
 
-	public PriceFilterMetaData fetchPriceIntervals(Double price,FilterMetaData filterMetaData) {
+	public PriceFilterMetaData fetchPriceIntervals(Double price, FilterMetaData filterMetaData) {
 		PriceFilterMetaData priceFilterMetaData = new PriceFilterMetaData();
 		Range range = getSmallerEndRange(price.intValue());
 		priceFilterMetaData.setV1(range.getMin());
 		priceFilterMetaData.setV2(range.getMax());
 		priceFilterMetaData.setFilterCriteria("-");
-		if(filterMetaData.getPriceFilters().contains(priceFilterMetaData))
-		{
+		if (filterMetaData.getPriceFilters().contains(priceFilterMetaData)) {
 			priceFilterMetaData.setFlag(true);
 		}
 		return priceFilterMetaData;
@@ -485,9 +538,10 @@ public class FetchProductService {
 	}
 
 	void createWeightFilterMetaData(WeightFilterMetaData weightFilterMetaData, Map.Entry<String, Set<Integer>> entry,
-			Integer w,FilterMetaData filterMetaData) {
+			Integer w, FilterMetaData filterMetaData) {
 
-		Set<WeightFilterMetaData> setWeightFilter=new HashSet<WeightFilterMetaData>(filterMetaData.getWeightFilters());
+		Set<WeightFilterMetaData> setWeightFilter = new HashSet<WeightFilterMetaData>(
+				filterMetaData.getWeightFilters());
 		weightFilterMetaData.setV1(w);
 		weightFilterMetaData.setU1(entry.getKey());
 		if (entry.getKey().equals("kg") || entry.getKey().equals("litre")) {
@@ -502,11 +556,10 @@ public class FetchProductService {
 		}
 		weightFilterMetaData.setU2(entry.getKey());
 		weightFilterMetaData.setFilterCriteria("-");
-		if(setWeightFilter.contains(weightFilterMetaData))
-		{
+		if (setWeightFilter.contains(weightFilterMetaData)) {
 			weightFilterMetaData.setFlag(true);
 		}
-		
+
 	}
 
 	Range getSmallerEndRange(int weight) {
@@ -546,6 +599,232 @@ public class FetchProductService {
 			return range;
 		} else
 			return new Range(weight, weight + 5);
+	}
+
+	Predicate filterMetaDataOnSearch(String search, Join<Category, SubCategory> catSubJoin,
+			Join<SubCategory, Product> prodSubJoin, CriteriaBuilder cb, CriteriaFilterBuilderModel cbmodel) {
+
+		Predicate brandPred = cb.like(cbmodel.getProdSubJoin().get(BRAND), "%" + search + "%");
+		Predicate prodNamePred = cb.like(cbmodel.getProdSubJoin().get("name"), "%" + search + "%");
+		Predicate catSubPred = cb.like(cbmodel.getCatSubJoin().get("name"), "%" + search + "%");
+		Predicate catNamePred = cb.like(cbmodel.getCatRoot().get("name"), "%" + search + "%");
+		Predicate orProdSearch = cb.or(brandPred, prodNamePred, catSubPred, catNamePred);
+		return orProdSearch;
+
+	}
+
+	public FilterMetaData getFiltersBasedOnSearch(String search, FilterMetaData filterMetaData) {
+
+		String queryString = "select new shop.model.FilterDataModel(prod.brand,prodAvail.weight,prodAvail.weightUnit,prodAvail.price) from Product prod join SubCategory sub  on prod.subId=sub.id join Category cat on sub.categoryId=cat.id join ProductAvail prodAvail on prod.code=prodAvail.productId where (((soundex(prod.brand)=soundex(:productName) and  prod.brand like concat('%', SUBSTRING(:productName,1,2), '%') ) or  prod.brand like  CONCAT('%', :productName,'%')) or ((soundex(prod.name)=soundex(:productName) and  prod.name like concat('%', SUBSTRING(:productName,1,2), '%') ) or prod.name like  CONCAT('%', :productName,'%')) or ((soundex(sub.name)=soundex( :productName) and sub.name like concat('%', SUBSTRING(:productName,1,2), '%')) \r\n"
+				+ "or sub.name like  CONCAT('%', :productName,'%')) or ((soundex(cat.name)=soundex(:productName) and  cat.name like concat('%', SUBSTRING(:productName,1,2), '%')) or cat.name like  CONCAT('%',  :productName,'%') ) ) ";
+		String weightFilterMetadataString = "";
+		int weightCount = 0;
+		for (WeightFilterMetaData weightFilterMetadata : filterMetaData.getWeightFilters()) {
+			weightFilterMetadataString = weightFilterMetadataString + LEFT_PARANTHESIS
+					+ handleSearchWeightFilter(weightFilterMetadata) + RIGHT_PARANTHESIS;
+			weightCount++;
+			if (weightCount < filterMetaData.getWeightFilters().size()) {
+				weightFilterMetadataString = weightFilterMetadataString + OR;
+			}
+		}
+		if (weightFilterMetadataString.length() > 0)
+			queryString = queryString + AND + LEFT_PARANTHESIS + weightFilterMetadataString + RIGHT_PARANTHESIS;
+
+		String brandFilterMetadataString = "";
+		int countBrand = 0;
+		for (BrandFilterMetaData brandFilterMetadata : filterMetaData.getBrandFilters()) {
+			brandFilterMetadataString = brandFilterMetadataString + LEFT_PARANTHESIS + handleBrand(brandFilterMetadata)
+					+ RIGHT_PARANTHESIS;
+			countBrand++;
+			if (countBrand < filterMetaData.getBrandFilters().size()) {
+				brandFilterMetadataString = brandFilterMetadataString + OR;
+			}
+		}
+
+		if (brandFilterMetadataString.length() > 0)
+			queryString = queryString + AND + LEFT_PARANTHESIS + brandFilterMetadataString + RIGHT_PARANTHESIS;
+
+		int countPrice = 0;
+		String priceFilterMetadataString = "";
+		for (PriceFilterMetaData priceFilterMetadata : filterMetaData.getPriceFilters()) {
+			priceFilterMetadataString = priceFilterMetadataString + LEFT_PARANTHESIS
+					+ handleSearchPriceFilter(priceFilterMetadata) + RIGHT_PARANTHESIS;
+			countPrice++;
+			if (countPrice < filterMetaData.getPriceFilters().size()) {
+				priceFilterMetadataString = priceFilterMetadataString + OR;
+			}
+		}
+
+		if (priceFilterMetadataString.length() > 0)
+			queryString = queryString + AND + LEFT_PARANTHESIS + priceFilterMetadataString + RIGHT_PARANTHESIS;
+		TypedQuery<FilterDataModel> query = em.createQuery(queryString, FilterDataModel.class);
+		query.setParameter("productName", search);
+		List<FilterDataModel> prodList = query.getResultList();
+
+		if (prodList == null || prodList.isEmpty()) {
+			return filterMetaData;
+		}
+		FilterMetaData filterMetaDataResponse = new FilterMetaData();
+		Map<String, Set<Integer>> map = new HashMap<>();
+
+		prodList.forEach(prod -> {
+			if (map.get(prod.getWeightUnit()) == null) {
+				Set<Integer> productList = new TreeSet<Integer>();
+				productList.add(prod.getWeight());
+				map.put(prod.getWeightUnit(), productList);
+			} else {
+				map.get(prod.getWeightUnit()).add(prod.getWeight());
+			}
+
+		});
+		List<WeightFilterMetaData> filterWeightIntervalList = new ArrayList<WeightFilterMetaData>();
+
+		for (Map.Entry<String, Set<Integer>> entry : map.entrySet()) {
+			Set<Integer> set = entry.getValue();
+
+			set.forEach(w -> {
+				WeightFilterMetaData weightFilterMetaData = new WeightFilterMetaData();
+				if (filterWeightIntervalList.size() > 0) {
+					WeightFilterMetaData lastAdded = filterWeightIntervalList.get(filterWeightIntervalList.size() - 1);
+					OptionalInt containsValue = IntStream.rangeClosed(lastAdded.getV1(), lastAdded.getV2())
+							.filter(p -> p == w).findAny();
+					if (!containsValue.isPresent()) {
+
+						createWeightFilterMetaData(weightFilterMetaData, entry, w, filterMetaData);
+						filterWeightIntervalList.add(weightFilterMetaData);
+					} else if (containsValue.isPresent() && !(lastAdded.getU1().equals(entry.getKey()))) {
+
+						createWeightFilterMetaData(weightFilterMetaData, entry, w, filterMetaData);
+						filterWeightIntervalList.add(weightFilterMetaData);
+					}
+				} else {
+
+					createWeightFilterMetaData(weightFilterMetaData, entry, w, filterMetaData);
+					filterWeightIntervalList.add(weightFilterMetaData);
+				}
+
+			}
+
+			);
+
+		}
+		filterMetaDataResponse.setWeightFilters(filterWeightIntervalList);
+
+		Set<PriceFilterMetaData> filterPriceIntervalList = null;
+		filterPriceIntervalList = prodList.stream().map(prod -> fetchPriceIntervals(prod.getPrice(), filterMetaData))
+				.sorted().collect(Collectors.toSet());
+		Set<BrandFilterMetaData> brandFilterIntervalList = null;
+		brandFilterIntervalList = prodList.stream()
+				.map(prod -> createBranFilterMetaData(prod.getBrand(), filterMetaData)).sorted()
+				.collect(Collectors.toSet());
+
+		filterMetaDataResponse.setPriceFilters(filterPriceIntervalList);
+		filterMetaDataResponse.setBrandFilters(brandFilterIntervalList);
+		return filterMetaDataResponse;
+	}
+
+	private String handleBrand(BrandFilterMetaData brandFilterMetaData) {
+
+		return PROD + DOT + BRAND + EQUAL + SINGLE_QUOTE + brandFilterMetaData.getBrandName() + SINGLE_QUOTE;
+
+	}
+
+	private String handleSearchWeightFilter(WeightFilterMetaData filterMetaData) {
+		switch (filterMetaData.getFilterCriteria()) {
+		case BW:
+			return weightBetweenQuery(filterMetaData);
+
+		case LT:
+			return weightLessThanQuery(filterMetaData);
+
+		case GT:
+			return weightGreaterThanQuery(filterMetaData);
+
+		case EQ:
+			return weightEqualQuery(filterMetaData);
+
+		default:
+			return null;
+		}
+
+	}
+
+	private String handleSearchPriceFilter(PriceFilterMetaData filterMetaData) {
+		switch (filterMetaData.getFilterCriteria()) {
+		case BW:
+			return priceBetweenQuery(filterMetaData);
+
+		case LT:
+			return priceLessThanQuery(filterMetaData);
+
+		case GT:
+			return priceGreaterThanQuery(filterMetaData);
+
+		case EQ:
+			return priceEqualQuery(filterMetaData);
+
+		default:
+			return null;
+		}
+
+	}
+
+	private String priceEqualQuery(PriceFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + PRICE + EQUAL + filterMetaData.getV1();
+	}
+
+	private String priceGreaterThanQuery(PriceFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + PRICE + GREATER_THAN + filterMetaData.getV1();
+	}
+
+	private String priceLessThanQuery(PriceFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + PRICE + LESS_THAN + filterMetaData.getV1();
+	}
+
+	private String priceBetweenQuery(PriceFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + PRICE + BETWEEN + filterMetaData.getV1() + AND + filterMetaData.getV2();
+	}
+
+	private String weightBetweenQuery(WeightFilterMetaData filterMetaData) {
+
+		if (filterMetaData.getU1().equals(filterMetaData.getU2())) {
+			return PROD_AVAIL + DOT + WEIGHT + BETWEEN + filterMetaData.getV1() + AND + filterMetaData.getV2() + AND
+					+ PROD_AVAIL + DOT + WEIGHT_UNIT + EQUAL + SINGLE_QUOTE + filterMetaData.getU1() + SINGLE_QUOTE;
+		} else {
+			String subQueryString = LEFT_PARANTHESIS + PROD_AVAIL + DOT + WEIGHT + BETWEEN + filterMetaData.getV1()
+					+ AND + 1000 + AND + PROD_AVAIL + DOT + WEIGHT_UNIT + EQUAL + SINGLE_QUOTE + filterMetaData.getU1()
+					+ SINGLE_QUOTE + RIGHT_PARANTHESIS;
+			subQueryString = subQueryString + OR + LEFT_PARANTHESIS + PROD_AVAIL + DOT + WEIGHT + BETWEEN + 1 + AND
+					+ filterMetaData.getV2() + AND + PROD_AVAIL + DOT + WEIGHT_UNIT + EQUAL + SINGLE_QUOTE
+					+ filterMetaData.getU2() + SINGLE_QUOTE + RIGHT_PARANTHESIS;
+			return subQueryString;
+		}
+
+	}
+
+	private String weightLessThanQuery(WeightFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + WEIGHT + LESS_THAN + filterMetaData.getV1() + AND + PROD_AVAIL + DOT + WEIGHT_UNIT
+				+ EQUAL + SINGLE_QUOTE + filterMetaData.getU1() + SINGLE_QUOTE;
+
+	}
+
+	private String weightGreaterThanQuery(WeightFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + WEIGHT + GREATER_THAN + filterMetaData.getV1() + AND + PROD_AVAIL + DOT + WEIGHT_UNIT
+				+ EQUAL + SINGLE_QUOTE + filterMetaData.getU1() + SINGLE_QUOTE;
+
+	}
+
+	private String weightEqualQuery(WeightFilterMetaData filterMetaData) {
+
+		return PROD_AVAIL + DOT + WEIGHT + EQUAL + filterMetaData.getV1() + AND + PROD_AVAIL + DOT + WEIGHT_UNIT + EQUAL
+				+ SINGLE_QUOTE + filterMetaData.getU1() + SINGLE_QUOTE;
+
 	}
 
 }

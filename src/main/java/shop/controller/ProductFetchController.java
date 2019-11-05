@@ -23,6 +23,7 @@ import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
 import shop.model.FilterMetaData;
 import shop.model.Product;
+import shop.model.SearchProduct;
 import shop.service.FetchProductService;
 import shop.service.FetchSubCategoryService;
 import shop.util.FilterParamParser;
@@ -61,10 +62,18 @@ public class ProductFetchController {
 		return productList;
 	}
 
-	@RequestMapping("/product-name")
-	public List<Product> getProductName(@RequestParam("productName") String productName) throws InterruptedException {
 	
-		List<Product> productList = fetchProductService.getProductByName(replaceWithPattern(productName, " "));
+	
+	@RequestMapping("/product-name")
+	public List<SearchProduct> getProductName(@RequestParam(value="search", required = false) String search,
+			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
+			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
+			@RequestParam(value = "brandFilters", required = false) Set<String> brandFilters)
+			throws InterruptedException {
+
+		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
+		List<SearchProduct> productList = fetchProductService.getProductBasedOnFilter(replaceWithPattern(search, " "),
+				filterMetaData);
 
 		return productList;
 	}
@@ -102,8 +111,8 @@ public class ProductFetchController {
 		return productDtoList;
 	}
 
-	@RequestMapping(value = "/productFilter/cat/{catId}", method = RequestMethod.GET)
-	public List<Product> productFilters(@PathVariable String catId,
+	@RequestMapping(value = "/productFilter", method = RequestMethod.GET)
+	public List<SearchProduct> productFilters(@RequestParam(value = "catId", required = false) String catId,
 			@RequestParam(value = "subId", required = false) String subId,
 			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
 			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
@@ -114,16 +123,16 @@ public class ProductFetchController {
 
 	}
 
-	@RequestMapping(value = "/filterIntervals/cat/{catId}", method = RequestMethod.GET)
-	public FilterMetaData WeightBasedOnFilters(@PathVariable String catId,
+	@RequestMapping(value = "/filterIntervals", method = RequestMethod.GET)
+	public FilterMetaData WeightBasedOnFilters(@RequestParam(required = false) String catId,
 			@RequestParam(value = "subId", required = false) String subId,
 			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
 			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
-			@RequestParam(value = "brandFilters", required = false) Set<String> brandFilters) {
+			@RequestParam(value = "brandFilters", required = false) Set<String> brandFilters,
+			@RequestParam(value = "search", required = false) String search) {
 
 		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
-		return fetchProductService.getFiltersBasedOnCategoryAndSubCategoryId(catId,
-				subId,filterMetaData);
+		return fetchProductService.getFiltersBasedOnCategoryAndSubCategoryId(catId, subId, search, filterMetaData);
 	}
 
 	public String replaceWithPattern(String str, String replace) {
@@ -132,11 +141,23 @@ public class ProductFetchController {
 		Matcher mtch = ptn.matcher(str);
 		return mtch.replaceAll(replace);
 	}
-	
+
 	@RequestMapping("/product/{productCode}")
 	public Product getProduct(@PathVariable("productCode") String productCode) throws ParseException {
 		Product product = fetchProductService.findByProductCode(productCode);
 
 		return product;
 	}
+
+	@RequestMapping(value = "/searchFilterInterval", method = RequestMethod.GET)
+	public FilterMetaData filtersBasedOnSearch(
+			@RequestParam(value = "weightFilters", required = false) List<String> weightFilters,
+			@RequestParam(value = "priceFilters", required = false) List<String> priceFilters,
+			@RequestParam(value = "brandFilters", required = false) Set<String> brandFilters,
+			@RequestParam(value = "search", required = false) String search) {
+
+		FilterMetaData filterMetaData = FilterParamParser.parse(weightFilters, priceFilters, brandFilters);
+		return fetchProductService.getFiltersBasedOnSearch(search, filterMetaData);
+	}
+
 }

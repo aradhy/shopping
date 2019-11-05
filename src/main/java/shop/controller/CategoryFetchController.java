@@ -1,10 +1,12 @@
 package shop.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import shop.dto.CategoryDTO;
@@ -21,7 +23,6 @@ public class CategoryFetchController {
 
 	@Autowired
 	private FetchSubCategoryService fetchSubCategoryService;
-
 
 	@RequestMapping("/subcategory/{categoryId}")
 	public List<SubCategory> getSubCategory(@PathVariable String categoryId) {
@@ -50,14 +51,10 @@ public class CategoryFetchController {
 		return categoryList;
 	}
 
+	@RequestMapping("/category-search")
+	public List<CategoryDTO> getCategorySubCategoryForSearchFilter(@RequestParam Map<String, String> map) {
 
-
-	@RequestMapping("/category/{catId}")
-	public CategoryDTO getCategory(@PathVariable  String catId ) {
-		return fetchCategoryService.findCategorySubCategoryNames(catId);
+		return fetchCategoryService.getCategorySubCategory(map);
 	}
-
-
-	
 
 }

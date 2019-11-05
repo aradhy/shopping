@@ -1,15 +1,16 @@
 package shop.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -19,8 +20,10 @@ import org.springframework.stereotype.Service;
 
 import shop.daoservice.DaoCategoryService;
 import shop.dto.CategoryDTO;
+import shop.dto.CategoryOnProduct;
 import shop.dto.SubCategoryDTO;
 import shop.model.Category;
+import shop.model.Product;
 import shop.model.SubCategory;
 import shop.service.FetchCategoryService;
 import shop.util.Utility;
@@ -30,10 +33,9 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 
 	@Autowired
 	private DaoCategoryService daoCategoryService;
-	
+
 	@PersistenceContext
 	private EntityManager em;
-
 
 	public List<CategoryDTO> findAllCategory() {
 		List<Category> categoryList = null;
@@ -51,7 +53,7 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 
 		if (categorytDTOList == null || categorytDTOList.isEmpty()) {
 			categoryList = (List<Category>) daoCategoryService.findAll();
-			categorytDTOList = categoryList.parallelStream().map(category -> convertToDTOCategory(category,true))
+			categorytDTOList = categoryList.parallelStream().map(category -> convertToDTOCategory(category, true))
 					.collect(Collectors.toList());
 			if (!categoryList.isEmpty()) {
 				for (CategoryDTO category : categorytDTOList) {
@@ -67,25 +69,24 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 
 	}
 
-	CategoryDTO convertToDTOCategory(Category category,boolean flag) {
+	CategoryDTO convertToDTOCategory(Category category, boolean flag) {
 		CategoryDTO categoryDTO = new CategoryDTO();
 		categoryDTO.setId(category.getId());
 		categoryDTO.setName(category.getName());
 		List<SubCategoryDTO> subCategoryList = category.getSubCategory().parallelStream()
-				.map(sub -> convertToDTOSubCategory(sub,flag)).collect(Collectors.toList());
+				.map(sub -> convertToDTOSubCategory(sub, flag)).collect(Collectors.toList());
 		categoryDTO.setSubCategory(subCategoryList);
 
 		return categoryDTO;
 	}
 
-	SubCategoryDTO convertToDTOSubCategory(SubCategory subCategory,boolean flag) {
+	SubCategoryDTO convertToDTOSubCategory(SubCategory subCategory, boolean flag) {
 		SubCategoryDTO subCategoryDTO = new SubCategoryDTO();
 		subCategoryDTO.setId(subCategory.getId());
 		subCategoryDTO.setName(subCategory.getName());
-		if(flag)
-		{
-		subCategoryDTO.setImageId(subCategory.getImageId());
-		subCategoryDTO.setImageLink(subCategory.getImageLink());
+		if (flag) {
+			subCategoryDTO.setImageId(subCategory.getImageId());
+			subCategoryDTO.setImageLink(subCategory.getImageLink());
 		}
 		return subCategoryDTO;
 
@@ -108,36 +109,34 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 		return daoCategoryService.findCategorySelectedFields();
 	}
 
-	@Override
-	public List<Category> getSubCategoryByCategoryId(String categoryId,String subCategoryId) {
-		return getSubCategory(categoryId,subCategoryId);
-	}
 
-	List<Category> getSubCategory(String categoryId,String subCategoryId) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Category> catQuery=null;
-		CriteriaQuery<SubCategory> subCatQuery=null;
-		Root<Category> catRoot=null;
-		if(isNotNullOrEmpty(categoryId))
-		{
-			catQuery = cb.createQuery(Category.class);
-			 catRoot = catQuery.from(Category.class);	
-			
-		}
-		if(isNotNullOrEmpty(subCategoryId))
-			subCatQuery = cb.createQuery(SubCategory.class);
-		List<Predicate> criteria = new ArrayList<Predicate>();
-		if(isNotNullOrEmpty(subCategoryId))
-		criteria.add(cb.equal(catRoot.get("id"),categoryId));
-		if(isNotNullOrEmpty(categoryId))
-		criteria.add(cb.equal(catRoot.get("id"),categoryId));
-		catQuery.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
+	
+
+	public List<CategoryOnProduct> getCategorySubCategory(String categoryId,String subId) {
 		
-		List<Category> catList=  em.createQuery(catQuery).getResultList();
-		return catList;
+	
+		CriteriaBuilder cb = em.getCriteriaBuilder();
 
+		CriteriaQuery<CategoryOnProduct> query = cb.createQuery(CategoryOnProduct.class);
+		Root<Category> catRoot = query.from(Category.class);
+		Join<SubCategory, Product> catSubJoin = catRoot.join("subCategory");
+		
+		List<Predicate> criteria = new ArrayList<Predicate>();
+		if (categoryId != null)
+			criteria.add(cb.equal(catRoot.get("id"), categoryId));
+		if (subId != null)
+			criteria.add(cb.equal(catSubJoin.get("id"), subId));
+		
+		query.multiselect(catRoot.get("id"), catRoot.get("name"), catSubJoin.get("id"),
+				catSubJoin.get("name")).distinct(true);
+		
+		query.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
+
+		List<CategoryOnProduct> categoryDTOList = em.createQuery(query).getResultList();
+		return categoryDTOList;
+
+		
 	}
-
 
 	public static boolean isNotNullOrEmpty(String str) {
 		if (str != null && !str.isEmpty())
@@ -146,12 +145,47 @@ public class FetchCategoryServiceImpl implements FetchCategoryService {
 	}
 
 	@Override
-	public CategoryDTO findCategorySubCategoryNames(String catId) {
-		// daoCategoryService.findById(catId);
-		 Optional<Category> categoryOpt = daoCategoryService.findById(catId);
-			Category category=	categoryOpt.get();
-			return convertToDTOCategory(category,false);
+	public List<CategoryDTO> getCategorySubCategory(Map<String,String> map) {
+		List<CategoryOnProduct> listCategory =null;
+		String productName=map.get("search");
+		if(productName!=null)
+		{
+			 listCategory = daoCategoryService.findCategorySubCategoryByProductName(productName);
+		}
+		else
+		{
+			String categoryId=map.get("catId");
+			String subId=map.get("subId");
+			listCategory = getCategorySubCategory(categoryId,subId);
+		}
+			
+		Map<String, CategoryDTO> mapCategoryDTO = new HashMap<String, CategoryDTO>();
+		for (CategoryOnProduct categoryOnProduct : listCategory) {
+			CategoryDTO categoryDTO=null;
+			if (mapCategoryDTO.get(categoryOnProduct.getCategoryId()) == null) {
+				 categoryDTO = new CategoryDTO(categoryOnProduct.getCategoryId(),
+						categoryOnProduct.getName());
+				SubCategoryDTO subCategory = new SubCategoryDTO(categoryOnProduct.getSubCategoryId(),
+						categoryOnProduct.getSubName());
+				categoryDTO.getSubCategory().add(subCategory);
+				mapCategoryDTO.put(categoryOnProduct.getCategoryId(), categoryDTO);
+
+			} else {
+				categoryDTO = mapCategoryDTO.get(categoryOnProduct.getCategoryId());
+				SubCategoryDTO subCategory = new SubCategoryDTO(categoryOnProduct.getSubCategoryId(),
+						categoryOnProduct.getSubName());
+				categoryDTO.getSubCategory().add(subCategory);
+			
+			}
+			
+		}
 		
+		
+		return new ArrayList<>(mapCategoryDTO.values());
 	}
+
+
+	
+	
 
 }
