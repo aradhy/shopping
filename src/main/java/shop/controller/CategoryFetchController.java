@@ -17,12 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-
-
 import shop.dto.CategoryDTO;
 import shop.model.Category;
 import shop.model.SubCategory;
-import shop.model.TokenDTO;
 import shop.service.FetchCategoryService;
 import shop.service.FetchSubCategoryService;
 
@@ -85,16 +82,16 @@ public class CategoryFetchController {
 		map.add("client_secret", "qb-rbrFVeqxKeHz3tq3WwC_E");
 	
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-	
+	/*
 		ResponseEntity<TokenDTO> response = restTemplate.postForEntity(
-		 "https://www.googleapis.com/oauth2/v4/token", request , shop.model.TokenDTO.class);
+		 "https://www.googleapis.com/oauth2/v4/token", request , shop.model.TokenDTO.class);*/
 	
 	
-		ResponseEntity<GoogleUserInfo> tokenDTO
-		 =restTemplate.getForEntity("https://www.googleapis.com/oauth2/v1/userinfo"+"?access_token="+response.getBody().getAccess_token(), GoogleUserInfo.class);
+		ResponseEntity<GoogleUserInfo> googleUserInfo
+		 =restTemplate.getForEntity("https://www.googleapis.com/oauth2/v1/userinfo"+"?access_token="+code, GoogleUserInfo.class);
 	
 	
-		return tokenDTO;
+		return googleUserInfo;
 	}
 
 }
