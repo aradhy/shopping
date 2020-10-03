@@ -25,6 +25,7 @@ public class FilterParamParser {
 					.map(weightFilterString -> createWeightFilterMetaData(weightFilterString))
 					.collect(Collectors.toList());
 			filterMetaData.setWeightFilters(listWeightRangeFilterMetaData);
+			filterMetaData.setWeightFlag(true);
 
 		}
 		if (priceFilters != null && priceFilters.size() > 0) {
@@ -32,6 +33,7 @@ public class FilterParamParser {
 					.map(weightFilterString -> createPriceFilterMetaData(weightFilterString))
 					.collect(Collectors.toSet());
 			filterMetaData.setPriceFilters(listPriceFilterMetaData);
+			filterMetaData.setPriceFlag(true);
 
 		}
 		if (brandFilters != null && brandFilters.size() > 0) {
@@ -39,6 +41,7 @@ public class FilterParamParser {
 			Set<BrandFilterMetaData> brandFilterMetaDataSet = brandFilters.parallelStream()
 					.map(brandName -> createBranFilterMetaData(brandName)).collect(Collectors.toSet());
 			filterMetaData.setBrandFilters(brandFilterMetaDataSet);
+			filterMetaData.setBrandFlag(true);
 		}
 		return filterMetaData;
 

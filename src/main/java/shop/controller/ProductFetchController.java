@@ -43,6 +43,7 @@ public class ProductFetchController {
 	public ProductDTO getProduct(@PathVariable("productCode") String productCode,
 			@PathVariable("prodAvailId") String prodAvailId, HttpServletResponse response) throws ParseException {
 		ProductDTO productDto = fetchProductService.findByProductAvail(productCode, prodAvailId);
+		
 
 		return productDto;
 	}
@@ -160,4 +161,11 @@ public class ProductFetchController {
 		return fetchProductService.getFiltersBasedOnSearch(search, filterMetaData);
 	}
 
+	
+	@RequestMapping(value = "/products", method = RequestMethod.GET)
+	public Set<SearchProduct> getAllProducts()
+	{
+		return daoProductService.findAllProducts();
+		
+	}
 }

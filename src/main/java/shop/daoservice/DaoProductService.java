@@ -1,6 +1,7 @@
 package shop.daoservice;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import shop.dto.ProductDTO;
 import shop.model.Category;
 import shop.model.Product;
 import shop.model.ProductFilter;
+import shop.model.SearchProduct;
 import shop.model.SubCategory;
 
 @Repository
@@ -59,5 +61,9 @@ public interface DaoProductService extends JpaRepository<Product,String> {
 			+ "ELSE  prod.name \r\n" + 
 			"    END)")
 	List<Product> findFilters(@Param("productName") String productName);
+	
+	@Query(value="select new shop.model.SearchProduct(cat.id,prod) from Product prod join SubCategory sub  on prod.subId=sub.id join Category cat on sub.categoryId=cat.id join ProductAvail prodAvail on prod.code=prodAvail.productId ")
+	Set<SearchProduct> findAllProducts();
+	
 	
 }

@@ -26,9 +26,15 @@ public class ImageFetchFromFileImpl implements ImageFetchService {
 	public Map<String, String> getImages(List<String> imageIds) {
 
 		Map<String, String> map = new HashMap<String, String>();
+		System.out.println("Hihiii!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		System.out.println(shopConfiguration.getImagesPack());
+		System.out.println("33333333333333333333344444444444444444444444");
+
 		File folder = new File(shopConfiguration.getImagesPack());
 
 		List<File> fileList = new ArrayList<>(Arrays.asList(folder.listFiles()));
+		System.out.println("MMMMMMMMMMMMMMMMMMMNNNNNNNNNNNNNNNNNOOOOOOOOOO ");
+		System.out.println(fileList);
 
 		List<String> fileIds = fileList.stream().map(file -> getImageId(file)).filter(fileId -> imageIds.contains(fileId))
 				.collect(Collectors.toList());

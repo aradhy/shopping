@@ -12,7 +12,6 @@ drop table IF EXISTS category;
 CREATE TABLE `category` (
   `id` varchar(255) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
-  `imageId` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB;
@@ -30,15 +29,15 @@ CREATE TABLE `subCategory` (
 CREATE TABLE `product` (
   `code` varchar(20) NOT NULL,
   `brand` varchar(255) DEFAULT NULL,
-  `imageId` varchar(20) DEFAULT NULL,
+  `imageId` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `prodAddedDate` datetime DEFAULT NULL,
   `subId` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`code`),
-  FOREIGN KEY (subId) REFERENCES subCategory(id)
-) ENGINE=INNODB;
-
-CREATE TABLE `productAvail` (
+  KEY `subId` (`subId`),
+  CONSTRAINT `product_ibfk_1` FOREIGN KEY (`subId`) REFERENCES `subcategory` (`id`)
+) ;
+CREATE TABLE `product_avail` (
   `id` varchar(40) NOT NULL,
   `totalAvailUnits` int(11) DEFAULT NULL,
   `weight` int(11) DEFAULT NULL,

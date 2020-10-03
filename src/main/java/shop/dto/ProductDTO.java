@@ -10,6 +10,7 @@ public class ProductDTO {
 	private Double price;
 	private Integer weight;
 	private String weightUnit;
+	private Integer noUnits;
 	
 	
 	public ProductDTO(String prodAvailId,String prodCode, String name,String brand, String imageId,Double price, Integer weight, String weightUnit) {
@@ -96,5 +97,19 @@ public class ProductDTO {
 		this.prodAvailId = prodAvailId;
 	}
 	
+	/**
+	 * @return the noUnits
+	 */
+	public Integer getNoUnits() {
+		return noUnits;
+	}
+
+
+	/**
+	 * @param noUnits the noUnits to set
+	 */
+	public void setNoUnits(Integer noUnits) {
+		this.noUnits = noUnits;
+	}
 	
 }

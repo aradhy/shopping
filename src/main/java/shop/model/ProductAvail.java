@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Entity
-@Table(name="ProductAvail")
+@Table(name="product_avail")
 @JsonInclude(value=Include.NON_NULL)
 public class ProductAvail {
 	
@@ -22,7 +22,21 @@ public class ProductAvail {
 	private Integer weight;
 	private String weightUnit;
 	private Double price;
+	@Transient
+	private String brand;
 
+	/**
+	 * @return the brand
+	 */
+	public String getBrand() {
+		return brand;
+	}
+	/**
+	 * @param brand the brand to set
+	 */
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
 	@Transient
 	private Integer maxWeight;
 

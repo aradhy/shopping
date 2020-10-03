@@ -1,5 +1,26 @@
 package shop.service;
 
+import static shop.constant.Constants.AND;
+import static shop.constant.Constants.BETWEEN;
+import static shop.constant.Constants.BRAND;
+import static shop.constant.Constants.BW;
+import static shop.constant.Constants.DOT;
+import static shop.constant.Constants.EQ;
+import static shop.constant.Constants.EQUAL;
+import static shop.constant.Constants.GREATER_THAN;
+import static shop.constant.Constants.GT;
+import static shop.constant.Constants.LEFT_PARANTHESIS;
+import static shop.constant.Constants.LESS_THAN;
+import static shop.constant.Constants.LT;
+import static shop.constant.Constants.OR;
+import static shop.constant.Constants.PRICE;
+import static shop.constant.Constants.PROD;
+import static shop.constant.Constants.PROD_AVAIL;
+import static shop.constant.Constants.RIGHT_PARANTHESIS;
+import static shop.constant.Constants.SINGLE_QUOTE;
+import static shop.constant.Constants.WEIGHT;
+import static shop.constant.Constants.WEIGHT_UNIT;
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +33,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -26,7 +49,6 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import static shop.constant.Constants.*;
 import shop.daoservice.DaoProductService;
 import shop.dto.ProductDTO;
 import shop.model.BrandFilterMetaData;
@@ -80,6 +102,7 @@ public class FetchProductService {
 
 	public List<ProductFilter> getProductByName(String productName) {
 		List<ProductFilter> prodList = daoProductService.findByProductName(productName);
+		
 		return prodList;
 
 	}
@@ -112,7 +135,7 @@ public class FetchProductService {
 		}
 
 		if (brandFilterMetadataString.length() > 0)
-			queryString = queryString + AND + LEFT_PARANTHESIS + brandFilterMetadataString + RIGHT_PARANTHESIS;
+			queryString = queryString + OR + LEFT_PARANTHESIS + brandFilterMetadataString + RIGHT_PARANTHESIS;
 
 		int countPrice = 0;
 		String priceFilterMetadataString = "";
@@ -389,7 +412,6 @@ public class FetchProductService {
 
 	public CriteriaBuilderModel getQueryBuilder() {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
-
 		CriteriaQuery<SearchProduct> query = cb.createQuery(SearchProduct.class);
 		Root<SubCategory> subRoot = query.from(SubCategory.class);
 		Join<SubCategory, Product> prodSubJoin = subRoot.join("productList");
@@ -512,6 +534,10 @@ return null;
 
 		filterMetaDataResponse.setPriceFilters(filterPriceIntervalList);
 		filterMetaDataResponse.setBrandFilters(brandFilterIntervalList);
+		
+		filterMetaDataResponse.setBrandFlag(filterMetaData.getBrandFlag());
+		filterMetaDataResponse.setPriceFlag(filterMetaData.getPriceFlag());
+		filterMetaDataResponse.setWeightFlag(filterMetaData.getWeightFlag());
 		return filterMetaDataResponse;
 	}
 
@@ -614,9 +640,21 @@ return null;
 	}
 
 	public FilterMetaData getFiltersBasedOnSearch(String search, FilterMetaData filterMetaData) {
+		
 
-		String queryString = "select new shop.model.FilterDataModel(prod.brand,prodAvail.weight,prodAvail.weightUnit,prodAvail.price) from Product prod join SubCategory sub  on prod.subId=sub.id join Category cat on sub.categoryId=cat.id join ProductAvail prodAvail on prod.code=prodAvail.productId where (((soundex(prod.brand)=soundex(:productName) and  prod.brand like concat('%', SUBSTRING(:productName,1,2), '%') ) or  prod.brand like  CONCAT('%', :productName,'%')) or ((soundex(prod.name)=soundex(:productName) and  prod.name like concat('%', SUBSTRING(:productName,1,2), '%') ) or prod.name like  CONCAT('%', :productName,'%')) or ((soundex(sub.name)=soundex( :productName) and sub.name like concat('%', SUBSTRING(:productName,1,2), '%')) \r\n"
-				+ "or sub.name like  CONCAT('%', :productName,'%')) or ((soundex(cat.name)=soundex(:productName) and  cat.name like concat('%', SUBSTRING(:productName,1,2), '%')) or cat.name like  CONCAT('%',  :productName,'%') ) ) ";
+		String queryString = "with findCat as(\r\n" + 
+				"				select cat.id as mainId from Product prod join SubCategory sub  on prod.subId=sub.id join Category cat on sub.categoryId=cat.id  where ((soundex(prod.brand)=soundex(:productName) and  prod.brand like concat('%', SUBSTRING(:productName,1,2), '%') ) or  prod.brand like  CONCAT('%',:productName,'%'))\r\n" + 
+				"				or ((soundex(prod.name)=soundex(:productName) and  prod.name like concat('%', SUBSTRING(:productName,1,2), '%') ) or prod.name like  CONCAT('%',:productName,'%'))\r\n" + 
+				"				\r\n" + 
+				"				 or ((soundex(sub.name)=soundex( :productName) and sub.name like concat('%', SUBSTRING('',1,2), '%')) \r\n" + 
+				"							 or sub.name like  CONCAT('%', :productName,'%')) or ((soundex(cat.name)=soundex(:productName) and  cat.name like concat('%', SUBSTRING(:productName,1,2), '%')) or cat.name like  CONCAT('%',  :productName,'%') )\r\n" + 
+				"				           \r\n" + 
+				"				 )\r\n" + 
+				"				 \r\n" + 
+				"				 select prod.brand,prodAvail.weight,prodAvail.weightUnit,prodAvail.price from Product prod join SubCategory sub on prod.subId=sub.id join  findCat on findCat.mainId=sub.categoryId\r\n" + 
+				"				join Product_Avail prodAvail on prod.code=prodAvail.productId"  
+				;
+				
 		String weightFilterMetadataString = "";
 		int weightCount = 0;
 		for (WeightFilterMetaData weightFilterMetadata : filterMetaData.getWeightFilters()) {
@@ -657,9 +695,10 @@ return null;
 
 		if (priceFilterMetadataString.length() > 0)
 			queryString = queryString + AND + LEFT_PARANTHESIS + priceFilterMetadataString + RIGHT_PARANTHESIS;
-		TypedQuery<FilterDataModel> query = em.createQuery(queryString, FilterDataModel.class);
+		Query query = em.createNativeQuery(queryString);
 		query.setParameter("productName", search);
-		List<FilterDataModel> prodList = query.getResultList();
+		List<Object[]> queryList =(List<Object[]>) query.getResultList();
+		List<FilterDataModel> prodList=parseQueryList(queryList);
 
 		if (prodList == null || prodList.isEmpty()) {
 			return filterMetaData;
@@ -720,7 +759,31 @@ return null;
 
 		filterMetaDataResponse.setPriceFilters(filterPriceIntervalList);
 		filterMetaDataResponse.setBrandFilters(brandFilterIntervalList);
+		filterMetaDataResponse.setBrandFlag(filterMetaData.getBrandFlag());
+		filterMetaDataResponse.setPriceFlag(filterMetaData.getPriceFlag());
+		filterMetaDataResponse.setWeightFlag(filterMetaData.getWeightFlag());
 		return filterMetaDataResponse;
+	}
+
+	private List<FilterDataModel> parseQueryList(List<Object[]> queryList) {
+		if(queryList.size()>0)
+		{
+		List<FilterDataModel> list=new ArrayList<FilterDataModel>();
+		for(Object[] obj:queryList)
+		{
+			String brand=(String)obj[0];
+			Integer weight		=(Integer) obj[1]; 
+			String weightUnit=		(String) obj[2]; 
+			Double price=		(Double) obj[3];
+			FilterDataModel filterModel=new FilterDataModel(brand,weight, weightUnit, price);
+			list.add(filterModel);
+		}
+		 
+		return list;
+		}
+		else
+		
+		return null;
 	}
 
 	private String handleBrand(BrandFilterMetaData brandFilterMetaData) {
@@ -827,4 +890,6 @@ return null;
 
 	}
 
+	
+	
 }

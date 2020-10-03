@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Entity
-@Table(name = "Product")
+@Table(name = "product")
 @JsonInclude(value=Include.NON_NULL)
 public class Product {
 	@Id

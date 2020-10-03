@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 @Entity
-@Table(name = "Category")
+@Table(name = "category")
 public class Category {
 	@Id
 

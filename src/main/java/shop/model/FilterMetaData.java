@@ -14,6 +14,75 @@ public class FilterMetaData {
 	private Set<PriceFilterMetaData> priceFilters = new HashSet<PriceFilterMetaData>();
 	private List<WeightFilterMetaData> weightFilters = new ArrayList<WeightFilterMetaData>();
 	private Set<BrandFilterMetaData> brandFilters = new HashSet<BrandFilterMetaData>();
+	private Boolean priceFlag=false;
+	private Boolean weightFlag=false;
+	private Boolean brandFlag=false;
+
+
+
+
+	/**
+	 * @return the priceFlag
+	 */
+	public Boolean getPriceFlag() {
+		return priceFlag;
+	}
+
+
+
+
+
+	/**
+	 * @param priceFlag the priceFlag to set
+	 */
+	public void setPriceFlag(Boolean priceFlag) {
+		this.priceFlag = priceFlag;
+	}
+
+
+
+
+
+	/**
+	 * @return the weightFlag
+	 */
+	public Boolean getWeightFlag() {
+		return weightFlag;
+	}
+
+
+
+
+
+	/**
+	 * @param weightFlag the weightFlag to set
+	 */
+	public void setWeightFlag(Boolean weightFlag) {
+		this.weightFlag = weightFlag;
+	}
+
+
+
+
+
+	/**
+	 * @return the brandFlag
+	 */
+	public Boolean getBrandFlag() {
+		return brandFlag;
+	}
+
+
+
+
+
+	/**
+	 * @param brandFlag the brandFlag to set
+	 */
+	public void setBrandFlag(Boolean brandFlag) {
+		this.brandFlag = brandFlag;
+	}
+
 
 
 
